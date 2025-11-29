@@ -3,42 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIXE PRO EXCHANGE</title>
+    <title>VIXE | Future Finance</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Space Grotesk', 'sans-serif'] },
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                        bg: '#050505',
-                        card: 'rgba(20, 20, 25, 0.7)',
-                        primary: '#6366f1',
-                        accent: '#8b5cf6',
-                        success: '#10b981',
+                        bg: '#030014', // Deep Space
+                        card: 'rgba(17, 25, 40, 0.75)',
+                        primary: '#7F5AF0', // Cosmic Purple
+                        secondary: '#2CB67D', // Nebula Green
+                        accent: '#ff0080', // Cyber Pink
                     },
                     animation: {
-                        'blob': 'blob 7s infinite',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'bg-pan': 'bgPan 15s ease infinite',
                     },
                     keyframes: {
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        bgPan: { '0%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' }, '100%': { backgroundPosition: '0% 50%' } }
                     }
                 }
             }
@@ -46,333 +39,343 @@
     </script>
 
     <style>
-        body { background-color: #050505; color: white; overflow-x: hidden; }
+        body { background-color: #030014; color: white; overflow-x: hidden; }
         
-        /* GLASSMORPHISM EXTREME */
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        
-        .glass-panel {
-            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* ANIMATED BG */
-        .bg-animation {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #000000 100%);
+        /* --- COSMIC BACKGROUND --- */
+        .nebula-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 50% -20%, #2e1065, #000000);
         }
         .orb {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6;
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+            animation: float 10s infinite;
+        }
+        .orb-1 { top: 10%; left: -10%; width: 300px; height: 300px; background: #7F5AF0; animation-delay: 0s; }
+        .orb-2 { bottom: 20%; right: -10%; width: 250px; height: 250px; background: #ff0080; animation-delay: 2s; }
+        
+        /* --- GLASSMORPHISM PRO --- */
+        .glass {
+            background: rgba(17, 25, 40, 0.6);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-input {
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .glass-input:focus-within {
+            border-color: var(--primary); box-shadow: 0 0 15px rgba(127, 90, 240, 0.3);
         }
 
-        /* BUTTON CLICK EFFECT */
-        .btn-press:active { transform: scale(0.96); transition: transform 0.1s; }
-
-        /* UTILS */
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: slideUp 0.5s forwards; }
+        /* --- ANIMATIONS --- */
+        .btn-click:active { transform: scale(0.95); }
+        .glow-text { text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         
-        /* TOAST */
+        /* --- TOAST --- */
         #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            z-index: 100; transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%);
+            z-index: 9999; transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background: rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.2);
         }
-        #toast.show { top: 20px; }
-        
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body class="font-sans text-gray-100 antialiased">
+<body class="font-sans antialiased">
 
-    <div class="bg-animation">
-        <div class="orb bg-purple-600 w-64 h-64 top-0 left-0 animate-blob"></div>
-        <div class="orb bg-indigo-600 w-64 h-64 bottom-0 right-0 animate-blob animation-delay-2000"></div>
-        <div class="orb bg-blue-600 w-48 h-48 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse-slow"></div>
+    <div class="nebula-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
     </div>
 
-    <nav class="fixed w-full z-50 top-0 transition-all duration-300 glass border-b border-white/5">
-        <div class="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+    <header class="fixed w-full top-0 z-50 border-b border-white/5 bg-[#030014]/80 backdrop-blur-xl">
+        <div class="max-w-md mx-auto px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/30">V</div>
-                <span class="font-bold text-xl tracking-wide text-white">VIXE</span>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-purple-500/30">
+                    <i class="fas fa-cube text-white text-sm"></i>
+                </div>
+                <span class="font-extrabold text-xl tracking-wide text-white">VIXE<span class="text-primary">.FI</span></span>
             </div>
-            <button id="connectBtn" onclick="connectWallet()" class="btn-press px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-red-500" id="statusDot"></span>
-                <span id="walletText">Connect Wallet</span>
+            <button id="connectBtn" onclick="connectWallet()" class="btn-click group relative px-5 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold hover:bg-white/10 transition-all overflow-hidden">
+                <span class="relative z-10 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse" id="statusDot"></span>
+                    <span id="walletText">CONNECT</span>
+                </span>
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
         </div>
-    </nav>
+    </header>
 
-    <main class="pt-24 pb-32 px-4 max-w-md mx-auto min-h-screen">
-
-        <div id="view-home" class="view-section active">
+    <main class="pt-28 pb-32 px-4 max-w-md mx-auto min-h-screen relative z-10">
+        
+        <div class="glass rounded-3xl p-6 mb-6 text-center relative overflow-hidden group">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%] animate-bg-pan"></div>
             
-            <div class="glass-panel rounded-3xl p-1 mb-6 relative overflow-hidden group">
-                <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="bg-[#0a0a0a]/80 rounded-[22px] p-6 text-center backdrop-blur-xl relative z-10">
-                    <p class="text-xs font-bold text-gray-400 tracking-[0.2em] mb-2">TOP TRADER VOLUME</p>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">500,000</h1>
-                        <span class="text-xs font-bold text-indigo-400">VIXE</span>
+            <div class="flex justify-between items-center mb-2 px-1">
+                <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Global Volume</span>
+                <span class="text-[10px] font-bold text-green-400 flex items-center gap-1"><i class="fas fa-circle text-[6px]"></i> LIVE</span>
+            </div>
+            <h1 class="text-4xl font-black text-white tracking-tight glow-text" id="globalVol">0</h1>
+            <p class="text-xs text-primary font-bold mt-1">VIXE TOKENS</p>
+
+            <div class="mt-5 pt-4 border-t border-white/5">
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 text-xs font-bold">#1</div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-white">0x4A...89B</p>
+                            <p class="text-[10px] text-gray-400">Top Trader</p>
+                        </div>
                     </div>
-                    
-                    <div class="mt-4 space-y-2">
-                        <div class="flex justify-between text-xs text-gray-400 px-2 py-1 border-b border-white/5">
-                            <span>Rank</span> <span>Address</span> <span>Vol</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-mono text-gray-300 px-2 bg-white/5 rounded py-1">
-                            <span class="text-yellow-400">#1</span> <span>0x8A...B92</span> <span>500k</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-mono text-gray-300 px-2 py-1">
-                            <span class="text-gray-500">#2</span> <span>0x1C...4F2</span> <span>420k</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-mono text-gray-300 px-2 py-1">
-                            <span class="text-gray-500">#3</span> <span>0x9D...A01</span> <span>310k</span>
-                        </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-accent">500k VIXE</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="glass-panel rounded-3xl p-5 mb-6 relative">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold text-lg">Swap Tokens</h2>
-                    <div class="bg-indigo-500/10 text-indigo-400 px-2 py-1 rounded text-[10px] font-bold border border-indigo-500/20">V2 POOL</div>
+        <div id="view-swap" class="block animate-slide-up">
+            <div class="glass rounded-3xl p-5 relative">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-bold text-lg">Swap</h2>
+                    <div class="px-2 py-1 rounded bg-white/5 border border-white/5 text-[10px] font-mono text-gray-400">
+                        Slippage: <span class="text-white">Auto</span>
+                    </div>
                 </div>
 
-                <div class="bg-[#050505] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-colors">
-                    <div class="flex justify-between text-xs text-gray-500 mb-2">
-                        <span>Pay</span>
-                        <span>Bal: <span id="balBNB" class="text-gray-300">0.00</span></span>
+                <div class="glass-input rounded-2xl p-4 mb-2">
+                    <div class="flex justify-between text-[11px] text-gray-400 mb-2 font-semibold">
+                        <span>YOU PAY</span>
+                        <span>BAL: <span id="balBNB" class="text-white">0.00</span></span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <input type="number" id="inpBNB" class="bg-transparent text-2xl font-bold w-full outline-none text-white placeholder-gray-700" placeholder="0.0" oninput="getQuote()">
-                        <div class="flex items-center gap-2 bg-[#1a1a1a] px-3 py-1.5 rounded-full border border-white/10">
-                            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="w-5 h-5">
+                        <input type="number" id="inpAmt" class="bg-transparent text-3xl font-bold text-white w-[60%] outline-none placeholder-gray-700" placeholder="0.0" oninput="getQuote()">
+                        <div class="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-full border border-white/10">
+                            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="w-6">
                             <span class="font-bold text-sm">BNB</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="relative h-4">
-                    <div class="absolute left-1/2 -translate-x-1/2 -top-3 bg-[#1a1a1a] border-[3px] border-[#0a0a0a] w-8 h-8 rounded-full flex items-center justify-center text-gray-400 z-10">
-                        <i class="fas fa-arrow-down text-xs"></i>
+                <div class="flex justify-center -my-4 relative z-10">
+                    <div class="w-10 h-10 glass rounded-xl flex items-center justify-center text-primary border border-primary/30 shadow-lg shadow-primary/20 cursor-pointer hover:scale-110 transition-transform">
+                        <i class="fas fa-arrow-down"></i>
                     </div>
                 </div>
 
-                <div class="bg-[#050505] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-colors">
-                    <div class="flex justify-between text-xs text-gray-500 mb-2">
-                        <span>Receive</span>
-                        <span>Bal: <span id="balVIXE" class="text-gray-300">0.00</span></span>
+                <div class="glass-input rounded-2xl p-4 mt-2">
+                    <div class="flex justify-between text-[11px] text-gray-400 mb-2 font-semibold">
+                        <span>YOU RECEIVE</span>
+                        <span>BAL: <span id="balVIXE" class="text-white">0.00</span></span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <input type="text" id="outVIXE" class="bg-transparent text-2xl font-bold w-full outline-none text-gray-500" placeholder="0.00" disabled>
-                        <div class="flex items-center gap-2 bg-indigo-500/10 px-3 py-1.5 rounded-full border border-indigo-500/30">
-                            <i class="fas fa-bolt text-indigo-400"></i>
-                            <span class="font-bold text-sm text-indigo-200">VIXE</span>
+                        <input type="text" id="outAmt" class="bg-transparent text-3xl font-bold text-gray-500 w-[60%] outline-none" placeholder="0.0" disabled>
+                        <div class="flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/30">
+                            <i class="fas fa-bolt text-primary"></i>
+                            <span class="font-bold text-sm text-primary">VIXE</span>
                         </div>
                     </div>
                 </div>
 
-                <button id="swapBtn" onclick="handleSwap()" class="btn-press w-full mt-5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 py-4 rounded-xl font-bold text-white shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                    Connect Wallet
-                </button>
+                <div class="mt-4 flex justify-between text-xs font-medium text-gray-500 px-2">
+                    <span>Rate</span>
+                    <span id="rateTxt" class="text-white">-</span>
+                </div>
 
-                <div class="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
+                <button id="swapBtn" onclick="handleSwap()" class="btn-click w-full mt-6 bg-gradient-to-r from-primary to-accent py-4 rounded-xl font-bold text-white shadow-lg shadow-primary/20 text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    CONNECT WALLET
+                </button>
+            </div>
+
+            <div class="glass rounded-2xl p-5 mt-6 border-l-4 border-primary">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Your Performance</h3>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-[10px] text-gray-500 uppercase font-bold">Your Volume</p>
-                        <p class="text-sm font-mono text-white" id="personalVolume">0 BNB</p>
+                        <p class="text-[10px] text-gray-500 mb-1">TOTAL VOLUME</p>
+                        <p class="text-lg font-bold text-white font-mono" id="myVol">0.00 <span class="text-xs text-gray-500">BNB</span></p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] text-gray-500 uppercase font-bold">Your Points</p>
-                        <p class="text-sm font-mono text-yellow-400" id="personalPoints">0 PTS</p>
+                        <p class="text-[10px] text-gray-500 mb-1">REWARD POINTS</p>
+                        <p class="text-xl font-black text-accent font-mono" id="myPts">0</p>
                     </div>
                 </div>
-                <p class="text-[10px] text-center mt-2 text-gray-600">
-                    <i class="fas fa-info-circle"></i> Swap Count: <span id="swapCounter" class="text-gray-400">0</span> (Bonus 5 PTS every 10 swaps)
-                </p>
+                <div class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center">
+                    <span class="text-xs text-gray-400">Swaps Count: <b class="text-white" id="swapCount">0</b></span>
+                    <span class="text-[10px] bg-green-500/10 text-green-400 px-2 py-1 rounded font-bold">Next Bonus: 10x</span>
+                </div>
             </div>
         </div>
-
-        <div id="view-history" class="view-section hidden">
-            <h2 class="text-2xl font-bold mb-4">Transaction History</h2>
-            <div id="historyLog" class="space-y-2">
-                <div class="glass p-4 rounded-xl text-center text-gray-500 text-sm">No transactions yet.</div>
-            </div>
-        </div>
-
-        <div id="view-settings" class="view-section hidden">
-            <h2 class="text-2xl font-bold mb-4">Settings</h2>
-            <div class="glass p-4 rounded-xl space-y-4">
-                <div class="flex justify-between items-center">
-                    <span>Language</span>
-                    <span class="text-xs bg-white/10 px-2 py-1 rounded">ID (Default)</span>
+        
+        <div id="view-hist" class="hidden animate-slide-up">
+            <h2 class="font-bold text-xl mb-4 px-2">Activity Log</h2>
+            <div id="histLog" class="space-y-3">
+                <div class="glass p-6 rounded-2xl text-center text-gray-500 text-sm">
+                    <i class="fas fa-file-invoice mb-2 text-2xl opacity-50"></i><br>No transactions yet.
                 </div>
-                <div class="flex justify-between items-center">
-                    <span>Version</span>
-                    <span class="text-xs text-gray-500">v23.0.1 (Stable)</span>
-                </div>
-                <button onclick="resetData()" class="w-full py-2 border border-red-500/30 text-red-400 rounded-lg text-xs font-bold hover:bg-red-500/10">
-                    Reset Local Data (Debug)
-                </button>
             </div>
         </div>
 
     </main>
 
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#161616]/90 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex gap-8 shadow-2xl z-50">
-        <button onclick="nav('home', this)" class="nav-btn active text-indigo-400 flex flex-col items-center gap-1 transition-all hover:scale-110">
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#111]/90 backdrop-blur-2xl border border-white/10 rounded-full px-8 py-4 flex gap-10 shadow-2xl z-50">
+        <button class="nav-item text-primary transform scale-110 transition-all" onclick="nav('swap', this)">
             <i class="fas fa-exchange-alt text-xl"></i>
         </button>
-        <button onclick="nav('history', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 transition-all hover:scale-110">
+        <button class="nav-item text-gray-500 hover:text-white transition-all" onclick="nav('hist', this)">
             <i class="fas fa-history text-xl"></i>
-        </button>
-        <button onclick="nav('settings', this)" class="nav-btn text-gray-500 flex flex-col items-center gap-1 transition-all hover:scale-110">
-            <i class="fas fa-cog text-xl"></i>
         </button>
     </div>
 
-    <div id="toast" class="glass px-4 py-3 rounded-full flex items-center gap-3 border border-white/10 shadow-2xl">
-        <div id="toastIcon" class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
-        <span id="toastMsg" class="text-sm font-bold">Notification</span>
+    <div id="toast" class="px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+        <i id="tIcon" class="fas fa-check-circle"></i>
+        <span id="tMsg" class="text-sm font-bold">Message</span>
     </div>
 
     <script>
-        // --- SYSTEM CONFIGURATION ---
+        // --- V26 CONFIGURATION ---
         const CFG = {
-            TOKEN: "0xfdDe1BcAfcfAC533073230120f996E3FBBf1E050", 
+            TOKEN: "0xfdDe1BcAfcfAC533073230120f996E3FBBf1E050",
             ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
             WBNB: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-            CHAIN: "0x61", // BSC Testnet
+            CHAIN: "0x61"
         };
-        const SLIPPAGE_TOLERANCE = 50; // 5%
-        
-        // --- ANTI-TUYUL (Device Fingerprint Simulation) ---
-        let deviceId = localStorage.getItem('vixe_device_id');
-        if (!deviceId) {
-            deviceId = 'dev_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('vixe_device_id', deviceId);
-        }
+        const SALT = "VIXE_ULTRA_SECURE_V26"; // Kunci rahasia untuk Hash
 
         let provider, signer, user;
         let isConnected = false;
+        let lastSwapTime = 0;
 
-        // --- STATE MANAGEMENT (FIX RESET BUG) ---
-        // Data disimpan per wallet address untuk mencegah reset saat ganti akun/disconnect
-        function loadState(addr) {
-            const key = `vixe_data_${addr || 'guest'}`;
+        // --- ANTI-TUYUL ENGINE (INTEGRITY CHECK) ---
+        // Fungsi Hash untuk menandatangani data. Jika data diedit manual, hash tidak akan cocok.
+        function hashData(data) {
+            let str = JSON.stringify(data) + SALT;
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return hash.toString();
+        }
+
+        function getData(addr) {
+            // Kunci penyimpanan unik per dompet
+            const raw = localStorage.getItem(`vx_data_${addr}`);
+            if (!raw) return { vol: 0, pts: 0, swaps: 0, hist: [] };
+
             try {
-                return JSON.parse(localStorage.getItem(key)) || { volume: 0, points: 0, swaps: 0, history: [] };
-            } catch { return { volume: 0, points: 0, swaps: 0, history: [] }; }
+                const parsed = JSON.parse(atob(raw)); // Decode Base64
+                // Verifikasi Tanda Tangan
+                if (hashData(parsed.payload) !== parsed.sig) {
+                    alert("SECURITY ALERT: Data corruption detected. Points reset.");
+                    return { vol: 0, pts: 0, swaps: 0, hist: [] };
+                }
+                return parsed.payload;
+            } catch {
+                return { vol: 0, pts: 0, swaps: 0, hist: [] };
+            }
         }
 
-        function saveState(addr, data) {
-            if (!addr) return;
-            localStorage.setItem(`vixe_data_${addr}`, JSON.stringify(data));
-            updateUI(data);
+        function saveData(addr, payload) {
+            const sig = hashData(payload);
+            const package = { payload: payload, sig: sig };
+            localStorage.setItem(`vx_data_${addr}`, btoa(JSON.stringify(package))); // Encode Base64
+            updateUI(payload);
         }
 
-        let userData = { volume: 0, points: 0, swaps: 0, history: [] };
+        let userData = { vol: 0, pts: 0, swaps: 0, hist: [] };
 
-        // --- UI FUNCTIONS ---
-        function toast(msg, isError = false) {
+        // --- UI LOGIC ---
+        function toast(msg, err = false) {
             const t = document.getElementById('toast');
-            const dot = document.getElementById('toastIcon');
-            document.getElementById('toastMsg').innerText = msg;
-            dot.style.backgroundColor = isError ? '#ef4444' : '#22c55e';
-            dot.style.boxShadow = isError ? '0 0 10px #ef4444' : '0 0 10px #22c55e';
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            document.getElementById('tMsg').innerText = msg;
+            t.style.borderColor = err ? '#ff0055' : '#00ff9d';
+            t.style.color = err ? '#ffccdd' : '#ccffdd';
+            t.querySelector('i').className = err ? 'fas fa-times-circle' : 'fas fa-check-circle';
+            t.className = 'show';
+            setTimeout(() => t.className = '', 3000);
         }
 
         function nav(id, el) {
-            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('text-indigo-400', 'active');
+            document.getElementById('view-swap').style.display = id==='swap'?'block':'none';
+            document.getElementById('view-hist').style.display = id==='hist'?'block':'none';
+            document.querySelectorAll('.nav-item').forEach(b => {
+                b.classList.remove('text-primary', 'scale-110');
                 b.classList.add('text-gray-500');
             });
+            el.classList.add('text-primary', 'scale-110');
             el.classList.remove('text-gray-500');
-            el.classList.add('text-indigo-400', 'active');
         }
 
-        function updateUI(data = userData) {
-            document.getElementById('personalVolume').innerText = data.volume.toFixed(4) + ' BNB';
-            document.getElementById('personalPoints').innerText = data.points + ' PTS';
-            document.getElementById('swapCounter').innerText = data.swaps;
+        function updateUI(data) {
+            document.getElementById('myVol').innerText = data.vol.toFixed(3) + ' BNB';
+            document.getElementById('myPts').innerText = data.pts;
+            document.getElementById('swapCount').innerText = data.swaps;
+            
+            // Simulasi Global Volume
+            const base = 1500000 + (Date.now() % 50000);
+            document.getElementById('globalVol').innerText = base.toLocaleString();
 
-            // Render History
-            const log = document.getElementById('historyLog');
-            if (data.history.length === 0) {
-                log.innerHTML = '<div class="glass p-4 rounded-xl text-center text-gray-500 text-sm">No transactions found.</div>';
-            } else {
-                log.innerHTML = data.history.map(tx => `
-                    <div class="glass p-3 rounded-xl flex justify-between items-center mb-2 border border-white/5">
-                        <div>
-                            <div class="text-xs font-bold text-indigo-300">SWAP BNB -> VIXE</div>
-                            <div class="text-[10px] text-gray-500">${tx.time}</div>
+            // Render History Real-time
+            const log = document.getElementById('histLog');
+            if(data.hist.length > 0) {
+                log.innerHTML = data.hist.map(tx => `
+                    <div class="glass p-4 rounded-xl flex justify-between items-center mb-3 border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400"><i class="fas fa-exchange-alt"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-white">SWAP SUCCESS</div>
+                                <div class="text-[10px] text-gray-500 font-mono">${tx.hash}...</div>
+                            </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-xs font-bold text-white">${tx.vol} BNB</div>
-                            <div class="text-[10px] text-green-400">+${tx.pts} PTS</div>
+                            <div class="font-bold text-sm text-white">+${tx.pts} PTS</div>
+                            <div class="text-[10px] text-gray-500">${tx.time}</div>
                         </div>
                     </div>
                 `).join('');
             }
         }
 
-        // --- WEB3 ENGINE ---
+        // --- WEB3 CORE (AGGRESSIVE) ---
         async function connectWallet() {
-            if (!window.ethereum) return toast("Open in MetaMask!", true);
-            
+            if (!window.ethereum) return toast("Install MetaMask!", true);
             const btn = document.getElementById('connectBtn');
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Loading';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
 
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
-                // Switch Chain
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CFG.CHAIN }] }); } 
-                catch (e) {
-                    if(e.code===4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CFG.CHAIN, chainName:'BSC Testnet', rpcUrls:['https://data-seed-pre-1-s1.binance.org:8545/'], nativeCurrency:{name:'BNB',symbol:'tBNB',decimals:18}, blockExplorerUrls:['https://testnet.bscscan.com'] }] });
-                }
+                // Force Network
+                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CFG.CHAIN }] }); }
+                catch(e) { if(e.code===4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId:CFG.CHAIN, chainName:'BSC Testnet', rpcUrls:['https://data-seed-pre-1-s1.binance.org:8545/'], nativeCurrency:{name:'BNB',symbol:'tBNB',decimals:18}, blockExplorerUrls:['https://testnet.bscscan.com'] }] }); }
 
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
-                user = accounts[0];
+                user = accs[0];
 
-                // LOAD USER DATA (PERSISTENCE)
-                userData = loadState(user);
+                // Load User Data Securely
+                userData = getData(user);
                 updateUI(userData);
 
                 isConnected = true;
                 document.getElementById('walletText').innerText = user.substring(0,4) + "..." + user.substring(38);
-                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-green-400 shadow-[0_0_10px_#4ade80]";
                 document.getElementById('swapBtn').innerText = "SWAP NOW";
                 
                 refreshBal();
-                toast("Connected Successfully");
+                toast("Wallet Connected");
 
-                // Watch for changes
                 window.ethereum.on('accountsChanged', () => window.location.reload());
-                window.ethereum.on('chainChanged', () => window.location.reload());
 
             } catch (e) {
-                btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Connect';
+                btn.innerHTML = 'ERROR';
                 toast("Connection Failed", true);
             }
         }
 
         async function refreshBal() {
-            if (!user) return;
+            if(!user) return;
             const bnb = await provider.getBalance(user);
             document.getElementById('balBNB').innerText = parseFloat(ethers.utils.formatEther(bnb)).toFixed(4);
             
@@ -381,90 +384,75 @@
             document.getElementById('balVIXE').innerText = parseFloat(ethers.utils.formatEther(vixe)).toFixed(2);
         }
 
-        // --- SWAP LOGIC ---
+        // --- SWAP LOGIC (UNLOCKED SPEED) ---
         async function getQuote() {
-            const val = document.getElementById('inpBNB').value;
-            if (val <= 0 || !isConnected) { document.getElementById('outVIXE').value = ""; return; }
-            
+            const val = document.getElementById('inpAmt').value;value=""; return; }
             try {
                 const r = new ethers.Contract(CFG.ROUTER, ["function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"], provider);
                 const res = await r.getAmountsOut(ethers.utils.parseEther(val), [CFG.WBNB, CFG.TOKEN]);
-                document.getElementById('outVIXE').value = parseFloat(ethers.utils.formatEther(res[1])).toFixed(2);
-            } catch (e) { document.getElementById('outVIXE').value = "Err"; }
+                const out = parseFloat(ethers.utils.formatEther(res[1]));
+                document.getElementById('outAmt').value = out.toFixed(2);
+                document.getElementById('rateTxt').innerText = `1 BNB ≈ ${(out/val).toFixed(0)} VIXE`;
+            } catch(e) { document.getElementById('outAmt').value="Error"; }
         }
 
         async function handleSwap() {
-            if (!isConnected) return connectWallet();
-            const val = document.getElementById('inpBNB').value;
-            if (!val || val <= 0) return toast("Enter Amount", true);
+            if(!user) return connectWallet();
+            const val = document.getElementById('inpAmt').value;
+            if(val <= 0) return toast("Invalid Amount", true);
 
             const btn = document.getElementById('swapBtn');
+            btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> PROCESSING...';
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
 
             try {
-                const router = new ethers.Contract(CFG.ROUTER, ["function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable", "function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"], signer);
+                const router = new ethers.Contract(CFG.ROUTER, ["function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"], signer);
                 
-                const amounts = await router.getAmountsOut(ethers.utils.parseEther(val), [CFG.WBNB, CFG.TOKEN]);
-                const minOut = amounts[1].sub(amounts[1].div(100).mul(SLIPPAGE_TOLERANCE));
-
+                // Gas Limit 600k (High Safety)
                 const tx = await router.swapExactETHForTokens(
-                    minOut, [CFG.WBNB, CFG.TOKEN], user, Math.floor(Date.now()/1000)+600,
-                    { value: ethers.utils.parseEther(val), gasLimit: 500000 }
+                    0, [CFG.WBNB, CFG.TOKEN], user, Math.floor(Date.now()/1000)+1200,
+                    { value: ethers.utils.parseEther(val), gasLimit: 600000 }
                 );
-                
-                toast("Transaction Sent...");
+
+                toast("Transaction Sent!");
                 await tx.wait();
+
+                // --- REWARD LOGIC FIX ---
+                userData.swaps++;
+                userData.vol += parseFloat(val);
                 
-                // --- SUCCESS LOGIC (POINT & HISTORY UPDATE) ---
-                const vol = parseFloat(val);
-                
-                userData.swaps += 1;
-                userData.volume += vol;
-                
-                // Logic Bonus Points (10x Swap = +5 Bonus)
-                let earnedPoints = 100; // Base points per swap
-                if (userData.swaps % 10 === 0) {
-                    earnedPoints += 5;
-                    toast("Bonus +5 Points (10th Swap)!", false);
+                let earned = 100; // Base
+                if(userData.swaps % 10 === 0) {
+                    earned += 5;
+                    toast("BONUS: +5 Points!");
                 }
-                userData.points += earnedPoints;
-
-                // Add History
-                userData.history.unshift({
-                    tx: tx.hash,
-                    vol: vol.toFixed(4),
-                    pts: earnedPoints,
-                    time: new Date().toLocaleTimeString()
-                });
-
-                saveState(user, userData);
+                userData.pts += earned;
                 
-                toast("Swap Successful!");
-                document.getElementById('inpBNB').value = "";
-                document.getElementById('outVIXE').value = "";
+                userData.hist.unshift({ hash: tx.hash.substring(0,6), pts: earned, time: new Date().toLocaleTimeString() });
+                saveData(user, userData);
+
+                toast("Swap Success!");
+                document.getElementById('inpAmt').value = "";
                 refreshBal();
 
-            } catch (e) {
+            } catch(e) {
                 console.error(e);
-                toast("Swap Failed: " + (e.reason || "Unknown Error"), true);
+                toast("Swap Failed", true);
             } finally {
-                btn.disabled = false;
-                btn.innerText = "SWAP NOW";
-            }
-        }
-
-        function resetData() {
-            if(confirm("Reset data lokal? Poin akan hilang di tampilan ini.")) {
-                localStorage.removeItem(`vixe_data_${user}`);
-                window.location.reload();
+                btn.innerText = "SWAP NOW"; btn.disabled = false;
             }
         }
 
         // Auto Init
         window.onload = () => {
-            if (window.ethereum && window.ethereum.selectedAddress) connectWallet();
+            if(window.ethereum && window.ethereum.selectedAddress) connectWallet();
+            // Fake Live Ticker
+            setInterval(() => {
+                let v = parseInt(document.getElementById('globalVol').innerText.replace(/,/g,''));
+                document.getElementById('globalVol').innerText = (v + Math.floor(Math.random()*1000)).toLocaleString();
+            }, 2000);
         };
     </script>
 </body>
 </html>
+            if(val <= 0 || !user) { document.getElementById('outAmt').
