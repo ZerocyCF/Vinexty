@@ -1,455 +1,429 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIXE Portal V11</title>
+    <title>VIXE Portal V13</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: {
-                        bg: '#050508', // Deep space black
-                        glass: '#13131a',
-                        primary: '#ff0080', // Neon Pink
-                        secondary: '#00f7ff', // Neon Cyan
-                    },
-                    boxShadow: {
-                        'neon-pink': '0 0 20px rgba(255, 0, 128, 0.3)',
-                        'neon-cyan': '0 0 20px rgba(0, 247, 255, 0.3)',
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { background-color: #050508; color: white; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        
-        /* ANIMATED BG */
-        .animated-bg {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle at 20% 30%, rgba(255,0,128,0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(0,247,255,0.15) 0%, transparent 50%);
-            filter: blur(60px); opacity: 0.8;
+        /* CSS NATIVE DENGAN FOKUS RESPONSIVITAS */
+        :root {
+            --bg: #0a0a0a;
+            --card: #141414;
+            --primary: #6d28d9; /* Deep Purple */
+            --accent: #d946ef; /* Neon Pink */
+            --text: #ffffff;
+            --border: #2a2a2a;
+            --success: #00c853;
+            --error: #ff3b30;
         }
 
-        /* UI COMPONENTS */
-        .glass-panel {
-            background: rgba(19, 19, 26, 0.7); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            outline: none; 
+            user-select: none;
+            /* Perbaikan Font Rendering di Mobile */
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
         }
-        .glass-input {
-            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-        }
-        .glass-input:focus-within { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,0,128,0.2); }
         
-        .gradient-text { background: linear-gradient(to right, #ff0080, #00f7ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* NAVIGATION */
-        .nav-btn { position: relative; color: #666; transition: 0.3s; }
-        .nav-btn.active { color: white; }
-        .nav-btn.active::after {
-            content: ''; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-            width: 30px; height: 3px; background: linear-gradient(to right, #ff0080, #00f7ff);
-            border-radius: 10px; box-shadow: 0 0 10px #ff0080;
+        body {
+            background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh;
+            padding-bottom: 80px;
         }
 
-        /* UTILS */
-        .fade-in { animation: fadeUp 0.4s ease-out; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+        /* HEADER */
+        .header {
+            padding: 15px 20px; background: rgba(10,10,10,0.9);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50;
+        }
+        .logo { 
+            font-weight: 900; font-size: 22px; letter-spacing: -1px; 
+            background: linear-gradient(45deg, #fff, var(--accent)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+        .wallet-btn {
+            background: #1a1a1a; border: 1px solid #333; color: #fff;
+            padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .wallet-btn.connected { border-color: var(--success); color: var(--success); background: rgba(0,200,83,0.1); }
+
+        /* TABS (Responsif) */
+        .tabs { 
+            display: flex; padding: 10px 15px; gap: 10px; overflow-x: auto; 
+            position: sticky; top: 55px; z-index: 40; background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .tab-btn {
+            flex-shrink: 0; /* Penting untuk responsif */
+            padding: 10px 15px; border-radius: 10px; background: #1a1a1a; color: #888;
+            border: none; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        /* CONTAINER */
+        .container { max-width: 500px; width: 100%; margin: 0 auto; }
+        .view { display: none; padding: 15px; animation: fade 0.3s; }
+        .view.active { display: block; }
+        @keyframes fade { from{opacity:0; transform:translateY(5px)} to{opacity:1; transform:translateY(0)} }
+
+        /* CARDS & INPUTS */
+        .card { 
+            background: var(--card); border-radius: 16px; padding: 20px; 
+            border: 1px solid var(--border); margin-bottom: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
         
+        .input-box {
+            background: #000; border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .input-col { display: flex; flex-direction: column; gap: 5px; width: 60%; }
+        .label { font-size: 11px; color: #666; }
+        .amount { background: none; border: none; color: white; font-size: 22px; font-weight: 700; width: 100%; }
+        
+        .token { background: #222; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .token img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+
+        .swap-arrow { text-align: center; margin: -15px 0; position: relative; z-index: 2; }
+        .arrow-circle { width: 32px; height: 32px; background: #222; border: 3px solid var(--card); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #888; cursor: pointer; }
+
+        .btn-main {
+            width: 100%; padding: 16px; border-radius: 12px; border: none;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; font-size: 16px; font-weight: 700; margin-top: 15px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(109, 40, 217, 0.4);
+            transition: 0.2s;
+        }
+        .btn-main:disabled { background: #333; color: #666; box-shadow: none; cursor: default; }
+        .btn-main:active:not(:disabled) { transform: scale(0.98); }
+
+        /* NFT & MEME */
+        .nft-image { width:100%; border-radius:10px; margin-bottom:15px; object-fit: cover; height: 250px; }
+        .meme-input { width:100%; background:#000; border:1px solid #333; padding:12px; color:white; border-radius:10px; margin-bottom:10px; }
+        
+        /* TOAST */
         #toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150px);
-            z-index: 999; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); border: 1px solid #333;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #222; color: white; padding: 12px 24px; border-radius: 30px;
+            font-size: 13px; font-weight: 600; display: none; border: 1px solid #444; z-index: 999; white-space: nowrap;
         }
-        #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
-<body class="pb-24 font-sans">
+<body>
 
-    <div class="animated-bg"></div>
-
-    <nav class="sticky top-0 z-50 glass-panel border-b-0 border-white/5 px-5 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <i class="fas fa-cube text-2xl gradient-text animate-pulse"></i>
-            <span class="font-extrabold text-xl tracking-wider">VIXE<span class="text-primary">.</span>IO</span>
-        </div>
-        <button id="walletBtn" onclick="connectWallet()" class="glass-panel px-4 py-2 rounded-full text-xs font-bold hover:border-primary/50 transition-all flex items-center gap-2 shadow-lg shadow-black/20">
-            <i class="fas fa-wallet text-secondary"></i> <span>CONNECT</span>
-        </button>
-    </nav>
-
-    <div class="flex items-center justify-around px-4 py-4 glass-panel sticky top-[70px] z-40 mb-6">
-        <button onclick="nav('swap', this)" class="nav-btn active text-sm font-bold tracking-wider">SWAP</button>
-        <button onclick="nav('nft', this)" class="nav-btn text-sm font-bold tracking-wider">NFTs</button>
-        <button onclick="nav('meme', this)" class="nav-btn text-sm font-bold tracking-wider">LAUNCH</button>
-        <button onclick="nav('earn', this)" class="nav-btn text-sm font-bold tracking-wider">EARN</button>
+    <div class="header">
+        <div class="logo">VIXE.</div>
+        <button class="wallet-btn" id="walletBtn" onclick="connect()">Connect</button>
     </div>
 
-    <main class="max-w-[480px] mx-auto p-4 min-h-[70vh]">
-
-        <div id="view-swap" class="fade-in">
-            <div class="glass-panel rounded-3xl p-1 relative overflow-hidden">
-                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary opacity-50"></div>
-                <div class="bg-[#0a0a0d] rounded-[22px] p-5">
-                    <div class="flex justify-between mb-6 items-center">
-                        <span class="font-bold text-lg">Instant Swap</span>
-                        <div class="bg-black/50 px-3 py-1 rounded-full text-xs font-mono text-secondary border border-secondary/30"><i class="fas fa-gas-pump"></i> LOW GAS</div>
-                    </div>
-
-                    <div class="glass-input p-4 rounded-2xl mb-2">
-                        <div class="flex justify-between text-xs text-gray-400 mb-3 font-medium">
-                            <span>PAY (BNB)</span>
-                            <span>Bal: <span id="balBNB" class="text-white">0.00</span></span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <input type="number" id="inpSwap" placeholder="0.0" class="bg-transparent text-3xl font-bold w-full outline-none placeholder-gray-700" oninput="getQuote()">
-                            <div class="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-full border border-white/10">
-                                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="w-6 rounded-full"> 
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-center -my-4 relative z-10">
-                        <div class="w-10 h-10 bg-glass border-4 border-[#0a0a0d] rounded-xl flex items-center justify-center text-primary shadow-neon-pink cursor-pointer hover:rotate-180 transition-all">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                    </div>
-
-                    <div class="glass-input p-4 rounded-2xl mt-2">
-                        <div class="flex justify-between text-xs text-gray-400 mb-3 font-medium">
-                            <span>RECEIVE (VIXE)</span>
-                            <span>Bal: <span id="balVIXE" class="text-white">0.00</span></span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <input type="text" id="outSwap" placeholder="0.00" disabled class="bg-transparent text-3xl font-bold w-full outline-none text-gray-500">
-                            <div class="flex items-center gap-2 bg-primary/20 px-3 py-1.5 rounded-full border border-primary/30">
-                                <i class="fas fa-bolt text-primary"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-5 flex justify-between text-xs font-mono text-gray-500 px-2">
-                        <span>Rate:</span> <span id="rateTxt" class="text-secondary">-</span>
-                    </div>
-
-                    <button id="btnSwap" onclick="handleSwap()" class="w-full mt-5 bg-gradient-to-r from-primary to-purple-600 py-4 rounded-xl font-extrabold text-lg tracking-wider shadow-neon-pink transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:grayscale">
-                        CONNECT WALLET
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-nft" class="hidden fade-in space-y-6">
-            <div class="glass-panel p-1 rounded-3xl relative group">
-                <div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-3xl blur opacity-30 group-hover:opacity-70 transition duration-1000"></div>
-                <div class="relative bg-[#0a0a0d] p-5 rounded-[22px] overflow-hidden">
-                    <div class="h-64 rounded-2xl overflow-hidden relative mb-5">
-                        <img src="https://i.seadn.io/gae/H8jOCJuQokNqGBpkBN5wk1oZwO7LM8bNnrHCaekV2nKjnCqw6UB5oaH8XyNeBDto6bjRC6XdauAf8Dx6Znrq05ffJlqdun8lP21c?auto=format&w=1000" class="w-full h-full object-cover hover:scale-110 transition duration-500">
-                        <div class="absolute top-3 right-3 bg-black/60 backdrop-blur px-3 py-1 rounded-full text-xs font-bold border border-primary">
-                            <i class="fas fa-circle text-green-500 mr-1 text-[8px]"></i> LIVE MINT
-                        </div>
-                    </div>
-                    <h2 class="text-2xl font-extrabold">Cyber VIXE Genesis</h2>
-                    <p class="text-sm text-gray-400 mb-6">Hold to earn passive VIXE rewards and DAO access.</p>
-
-                    <div class="flex justify-between items-center bg-black/30 p-4 rounded-xl border border-white/5 mb-6">
-                        <div>
-                            <div class="text-xs text-gray-500 mb-1">MINT PRICE</div>
-                            <div class="text-xl font-bold gradient-text flex items-center gap-2">
-                                <i class="fas fa-bolt"></i> 5,000 VIXE
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs text-gray-500 mb-1">SUPPLY</div>
-                            <div class="font-mono font-bold">420 / 1000</div>
-                        </div>
-                    </div>
-
-                    <button id="btnNft" onclick="payWithVIXE('nft', 5000, 'btnNft')" class="w-full bg-primary py-4 rounded-xl font-extrabold tracking-wider shadow-neon-pink hover:bg-primary/80 transition-all active:scale-95">
-                        MINT NOW (PAY VIXE)
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="view-meme" class="hidden fade-in">
-            <div class="glass-panel rounded-3xl p-8 text-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-primary"></div>
-                
-                <div class="w-20 h-20 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-secondary/30 shadow-neon-cyan">
-                    <i class="fas fa-rocket text-4xl text-secondary"></i>
-                </div>
-                <h2 class="text-2xl font-extrabold mb-2">Deploy Meme Coin</h2>
-                <p class="text-sm text-gray-400 mb-8">Instant deployment on BSC. LP locked automatically. Pay fee in VIXE.</p>
-
-                <div class="space-y-4 text-left">
-                    <div class="glass-input p-4 rounded-2xl">
-                        <label class="text-xs font-bold text-secondary ml-1 mb-2 block">TOKEN NAME</label>
-                        <input type="text" class="bg-transparent w-full font-bold outline-none placeholder-gray-600" placeholder="e.g. Cyber Doge">
-                    </div>
-                    <div class="glass-input p-4 rounded-2xl flex gap-4">
-                        <div class="flex-1">
-                            <label class="text-xs font-bold text-secondary ml-1 mb-2 block">SYMBOL</label>
-                            <input type="text" class="bg-transparent w-full font-bold outline-none placeholder-gray-600" placeholder="CDOGE">
-                        </div>
-                        <div class="flex-1 border-l border-white/10 pl-4">
-                            <label class="text-xs font-bold text-secondary ml-1 mb-2 block">SUPPLY</label>
-                            <input type="text" class="bg-transparent w-full font-bold outline-none placeholder-gray-600" placeholder="1B">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 bg-black/30 p-4 rounded-xl border border-white/5 flex justify-between items-center">
-                    <span class="text-sm font-bold text-gray-400">DEPLOYMENT FEE</span>
-                    <span class="text-lg font-extrabold text-secondary"><i class="fas fa-bolt"></i> 10,000 VIXE</span>
-                </div>
-
-                <button id="btnMeme" onclick="payWithVIXE('meme', 10000, 'btnMeme')" class="w-full mt-4 bg-secondary text-black py-4 rounded-xl font-extrabold tracking-wider shadow-neon-cyan hover:bg-secondary/80 transition-all active:scale-95">
-                    DEPLOY NOW
-                </button>
-            </div>
-        </div>
-
-        <div id="view-earn" class="hidden fade-in">
-            <div class="glass-panel p-8 rounded-3xl text-center mb-8 relative overflow-hidden">
-                 <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
-                <p class="text-xs font-bold text-primary tracking-[0.2em] uppercase mb-2">Total Rewards</p>
-                <h1 class="text-5xl font-black gradient-text" id="ptsDisplay">0</h1>
-                <p class="text-xs text-gray-500 mt-2 font-mono">$VIXE POINTS</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="glass-panel p-5 rounded-2xl flex items-center justify-between transition-all hover:border-primary/50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-[#1DA1F2]/10 flex items-center justify-center text-[#1DA1F2] text-xl border border-[#1DA1F2]/20"><i class="fab fa-twitter"></i></div>
-                        <div>
-                            <h4 class="font-bold">Share on X</h4>
-                            <p class="text-xs text-gray-500">+50 Points</p>
-                        </div>
-                    </div>
-                    <button id="btnTw" onclick="doTask('tw')" class="glass-input px-5 py-2 rounded-xl text-xs font-bold hover:bg-white hover:text-black transition-all">CLAIM</button>
-                </div>
-                
-                <div class="glass-panel p-5 rounded-2xl flex items-center justify-between transition-all hover:border-secondary/50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary text-xl border border-secondary/20"><i class="fas fa-wallet"></i></div>
-                        <div>
-                            <h4 class="font-bold">Add to Wallet</h4>
-                            <p class="text-xs text-gray-500">+10 Points</p>
-                        </div>
-                    </div>
-                    <button id="btnAdd" onclick="doTask('add')" class="glass-input px-5 py-2 rounded-xl text-xs font-bold hover:bg-white hover:text-black transition-all">CLAIM</button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <div id="toast" class="px-6 py-4 rounded-2xl flex items-center gap-4 shadow-2xl">
-        <i class="fas fa-check-circle text-secondary text-xl"></i>
-        <div>
-            <h4 class="font-bold text-sm" id="toastTitle">Success</h4>
-            <p class="text-xs text-gray-400" id="toastMsg">Transaction completed</p>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="go('swap',this)">Swap</button>
+        <button class="tab-btn" onclick="go('nft',this)">NFT</button>
+        <button class="tab-btn" onclick="go('meme',this)">Launch</button>
+        <button class="tab-btn" onclick="go('earn',this)">Earn</button>
     </div>
+
+    <div class="container">
+        
+        <div id="swap" class="view active">
+            <div class="card">
+                <div class="input-box">
+                    <div class="input-col">
+                        <span class="label">PAY (BNB)</span>
+                        <input type="number" id="inpBNB" class="amount" placeholder="0.0" oninput="calc()">
+                    </div>
+                    <div class="token"><img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB Logo"> BNB</div>
+                </div>
+
+                <div class="swap-arrow"><div class="arrow-circle" onclick="swapTokenInput()"><i class="fas fa-arrow-down"></i></div></div>
+
+                <div class="input-box">
+                    <div class="input-col">
+                        <span class="label">RECEIVE (VIXE)</span>
+                        <input type="text" id="outVIXE" class="amount" placeholder="0.0" disabled style="color:#888">
+                    </div>
+                    
+                    <div class="token" style="border:1px solid var(--primary)">
+                        <img id="vixeLogo" src="https://cryptologos.cc/logos/polygon-matic-logo.png?v=029" alt="VIXE Logo"> 
+                        VIXE
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:#666;">
+                    <span>Rate</span>
+                    <span id="rateTxt">-</span>
+                </div>
+
+                <button id="swapBtn" class="btn-main" onclick="doSwap()">CONNECT WALLET</button>
+            </div>
+            
+            <div style="font-size:12px; color:#666; text-align:center; margin-top:10px;">
+                Balance: <span id="balBNB" style="color:white">0</span> BNB | <span id="balVIXE" style="color:white">0</span> VIXE
+            </div>
+        </div>
+
+        <div id="nft" class="view">
+            <div class="card">
+                <img id="nftImage" src="https://i.seadn.io/gcs/files/c3a312da536eb47461d94662c5242694.png?auto=format&w=500" class="nft-image" alt="NFT Preview">
+                
+                <div class="stat-row"><span>VIXE Genesis NFT</span><span style="color:#d946ef; font-weight:bold;">5,000 VIXE</span></div>
+                <p style="font-size:12px; color:#999; margin-top:-10px; margin-bottom:15px;">Unlock exclusive features by minting our utility NFT.</p>
+                <button id="btnNft" class="btn-main" onclick="payVixe(5000, 'NFT Minted Successfully')">MINT NFT</button>
+            </div>
+        </div>
+
+        <div id="meme" class="view">
+            <div class="card">
+                <h3 style="margin-top:0">Deploy New Token (Meme)</h3>
+                <input type="text" placeholder="Token Name (e.g. CyberDoge)" class="meme-input">
+                <input type="text" placeholder="Symbol (e.g. CDOGE)" class="meme-input">
+                <input type="number" placeholder="Total Supply (e.g. 1000000000)" class="meme-input">
+                <div style="font-size:12px; color:#888; margin-bottom:10px;">Cost: <span style="color:#d946ef; font-weight:bold;">10,000 VIXE</span> (Token Creation & LP Lock)</div>
+                <button id="btnMeme" class="btn-main" onclick="payVixe(10000, 'Token Deployed Successfully')">DEPLOY</button>
+            </div>
+        </div>
+
+        <div id="earn" class="view">
+            <div class="card" style="text-align:center; background:linear-gradient(135deg, #1a1a1a, #000);">
+                <div style="font-size:11px; color:#888; letter-spacing:2px;">TOTAL VIXE POINTS</div>
+                <div style="font-size:36px; font-weight:800; color:#d946ef;" id="pts">0</div>
+            </div>
+            <div class="card">
+                <div class="task-row">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <i class="fab fa-twitter" style="color:#1DA1F2;"></i> <span>Share Twitter</span>
+                    </div>
+                    <button id="btnTw" class="task-btn" onclick="task('tw')">+50</button>
+                </div>
+                <div class="task-row">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <i class="fas fa-wallet" style="color:#ff9800;"></i> <span>Add Token to Wallet</span>
+                    </div>
+                    <button id="btnAdd" class="task-btn" onclick="task('add')">+10</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast">Notification</div>
 
     <script>
-        // --- CONFIG (PASTIKAN INI BENAR) ---
-        const CFG = {
-            TOKEN: "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A", // ALAMAT VIXE ANDA
-            ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
-            WBNB: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-            CHAIN: "0x61",
-            RPC: "https://data-seed-pre-1-s1.binance.org:8545/",
-            // Alamat "Burn" atau Admin untuk menerima pembayaran VIXE
-            ADMIN_WALLET: "0x000000000000000000000000000000000000dEaD" 
-        };
-
-        // ERC20 ABI (Hanya fungsi yang dibutuhkan: transfer & balanceOf)
-        const ERC20_ABI = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function transfer(address to, uint256 amount) returns (bool)"
-        ];
+        // --- CONFIGURATION FIXED ---
+        const TOKEN = "0xfdDe1BcAfcfAC533073230120f996E3FBBf1E050"; // ALAMAT TOKEN VIXE ANDA
+        const ROUTER = "0xD99D1c33F9fC3444f8101754aBC46c52416550D1";
+        const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
+        const CHAIN = "0x61"; // 97 (BSC Testnet)
+        
+        // Alamat Admin/Burn/Penerima Pembayaran VIXE
+        const ADMIN_WALLET = "0x473bfa02cd66b3981ec09cd52766f110c8f661fa";
 
         let provider, signer, user;
-        let isConnected = false;
-        let points = parseInt(localStorage.getItem('v11_pts') || 0);
-        let tasks = JSON.parse(localStorage.getItem('v11_tasks') || '{}');
+        let points = parseInt(localStorage.getItem('pts')||0);
+        document.getElementById('pts').innerText = points.toLocaleString();
 
-        // INIT
-        document.getElementById('ptsDisplay').innerText = points.toLocaleString();
-        if(tasks.tw) markDone('btnTw');
-        if(tasks.add) markDone('btnAdd');
-        
-        // Auto-Poll Saldo (Setiap 3 detik)
-        setInterval(() => { if(isConnected) refreshBal(); }, 3000);
+        // Init tasks
+        let tasks = JSON.parse(localStorage.getItem('v13_tasks') || '{}');
+        if(tasks.tw) markDone(document.getElementById('btnTw'));
+        if(tasks.add) markDone(document.getElementById('btnAdd'));
 
-        // --- NAVIGASI ---
-        function nav(id, el) {
-            ['swap','nft','meme','earn'].forEach(v => document.getElementById('view-'+v).classList.add('hidden'));
-            document.getElementById('view-'+id).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        function go(id, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }
 
-        function toast(title, msg, isError=false) {
+        function toast(msg, err = false) {
             const t = document.getElementById('toast');
-            document.getElementById('toastTitle').innerText = title;
-            document.getElementById('toastMsg').innerText = msg;
-            t.querySelector('i').className = isError ? 'fas fa-times-circle text-primary text-xl' : 'fas fa-check-circle text-secondary text-xl';
-            t.style.borderColor = isError ? 'var(--primary)' : 'var(--secondary)';
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 4000);
+            t.innerText = msg;
+            t.style.border = err ? "1px solid var(--error)" : "1px solid var(--success)";
+            t.style.display = "block";
+            setTimeout(() => t.style.display = "none", 3000);
         }
 
-        // --- CORE WALLET ---
-        async function connectWallet() {
-            if(!window.ethereum) return toast("Error", "MetaMask not found", true);
-            const btn = document.getElementById('walletBtn');
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
-            
+        async function connect() {
+            if(!window.ethereum) return toast("No Wallet Found (Install MetaMask)", true);
             try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CFG.CHAIN }] }); }
-                catch(e) { if(e.code===4902) await window.ethereum.request({method:'wallet_addEthereumChain', params:[{chainId:CFG.CHAIN, chainName:'BSC Testnet', rpcUrls:[CFG.RPC], nativeCurrency:{name:'BNB',symbol:'tBNB',decimals:18}}]}); }
-
+                await window.ethereum.request({method:'eth_requestAccounts'});
+                try { await window.ethereum.request({method:'wallet_switchEthereumChain', params:[{chainId:CHAIN}]}); } catch(e){}
+                
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
-                user = accounts[0];
-                isConnected = true;
+                user = await signer.getAddress();
+                
+                document.getElementById('walletBtn').innerText = user.substring(0,4)+"...";
+                document.getElementById('walletBtn').classList.add('connected');
+                document.getElementById('swapBtn').innerText = "SWAP NOW";
+                
+                updateBal();
+                toast("Wallet Connected");
+                
+                // Auto refresh saldo setiap 5 detik
+                setInterval(updateBal, 5000);
 
-                btn.innerHTML = `<i class="fas fa-user-astronaut text-secondary"></i> ${user.substring(0,4)}...${user.substring(38)}`;
-                document.getElementById('btnSwap').innerText = "SWAP NOW";
-                document.getElementById('btnSwap').disabled = false;
-                refreshBal();
-                toast("Connected", "Wallet ready to rock!");
-            } catch(e) {
-                btn.innerHTML = '<i class="fas fa-wallet text-secondary"></i> CONNECT';
-                toast("Failed", e.message || "Connection cancelled", true);
-            }
+            } catch(e) { toast("Connection Failed", true); }
         }
 
-        async function refreshBal() {
-            if(!user) return;
-            const bnb = await provider.getBalance(user);
-            document.getElementById('balBNB').innerText = parseFloat(ethers.utils.formatEther(bnb)).toFixed(4);
-            
-            const tc = new ethers.Contract(CFG.TOKEN, ERC20_ABI, provider);
-            const vixe = await tc.balanceOf(user);
-            document.getElementById('balVIXE').innerText = parseFloat(ethers.utils.formatEther(vixe)).toFixed(2);
+        async function updateBal() {
+            if(!user || !provider) return;
+            try {
+                const bnb = await provider.getBalance(user);
+                document.getElementById('balBNB').innerText = parseFloat(ethers.utils.formatEther(bnb)).toFixed(4);
+                
+                const tc = new ethers.Contract(TOKEN, ["function balanceOf(address) view returns (uint)"], provider);
+                const vixe = await tc.balanceOf(user);
+                document.getElementById('balVIXE').innerText = parseFloat(ethers.utils.formatEther(vixe)).toFixed(2);
+                calc(); // Update quote setelah balance
+            } catch(e) { console.log("Bal update err", e); }
         }
 
         // --- SWAP LOGIC ---
-        async function getQuote() {
-            if(!isConnected) return;
-            const val = document.getElementById('inpSwap').value;
-            const out = document.getElementById('outSwap');
-            if(val <= 0) { out.value = ""; document.getElementById('rateTxt').innerText="-"; return; }
+        async function calc() {
+            const val = document.getElementById('inpBNB').value;
+            if(val <= 0 || !user || !provider) { 
+                document.getElementById('outVIXE').value=""; 
+                document.getElementById('rateTxt').innerText="-"; 
+                return; 
+            }
             try {
-                const r = new ethers.Contract(CFG.ROUTER, ["function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"], provider);
-                const res = await r.getAmountsOut(ethers.utils.parseEther(val), [CFG.WBNB, CFG.TOKEN]);
-                const vixe = parseFloat(ethers.utils.formatEther(res[1]));
-                out.value = vixe.toFixed(2);
-                document.getElementById('rateTxt').innerText = `1 BNB ≈ ${(vixe/val).toFixed(1)} VIXE`;
-            } catch(e) { out.value = "???"; }
+                const r = new ethers.Contract(ROUTER, ["function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"], provider);
+                const res = await r.getAmountsOut(ethers.utils.parseEther(val), [WBNB, TOKEN]);
+                const out = parseFloat(ethers.utils.formatEther(res[1]));
+                document.getElementById('outVIXE').value = out.toFixed(2);
+                document.getElementById('rateTxt').innerText = `1 BNB ≈ ${(out/val).toFixed(0)} VIXE`;
+            } catch(e) { 
+                document.getElementById('outVIXE').value="0.0"; 
+                document.getElementById('rateTxt').innerText="Error: No Liquidity";
+            }
+        }
+        
+        function swapTokenInput() {
+            // Fungsionalitas hanya untuk tampilan/visual. Logika swap tetap BNB -> VIXE.
+            toast("Swap Token (Visual Only)", true);
         }
 
-        async function handleSwap() {
-            if(!isConnected) return connectWallet();
-            const val = document.getElementById('inpSwap').value;
-            if(val <= 0) return toast("Invalid Input", "Enter BNB amount", true);
+        async function doSwap() {
+            if(!user) return connect();
+            const val = document.getElementById('inpBNB').value;
+            if(val <= 0) return toast("Enter valid BNB Amount", true);
             
-            const btn = document.getElementById('btnSwap');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Swapping...';
+            const btn = document.getElementById('swapBtn');
+            btn.innerText = "Processing..."; btn.disabled = true;
             
             try {
-                const router = new ethers.Contract(CFG.ROUTER, ["function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"], signer);
-                const tx = await router.swapExactETHForTokens(0, [CFG.WBNB, CFG.TOKEN], user, Math.floor(Date.now()/1000)+1200, { value: ethers.utils.parseEther(val), gasLimit: 500000 });
-                toast("Swap Sent", "Waiting for confirmation...");
+                const r = new ethers.Contract(ROUTER, ["function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"], signer);
+                
+                const tx = await r.swapExactETHForTokens(
+                    0, [WBNB, TOKEN], user, Math.floor(Date.now()/1000)+600, 
+                    { value: ethers.utils.parseEther(val), gasLimit: 500000 }
+                );
+                toast("Transaction Sent! Waiting for confirmation...");
                 await tx.wait();
-                toast("Swap Complete!", "VIXE received successfully.");
-                document.getElementById('inpSwap').value = ""; document.getElementById('outSwap').value = "";
-                addPoints(100);
-            } catch(e) {
-                toast("Swap Failed", e.message.includes("insufficient") ? "Insufficient BNB balance" : "Transaction failed", true);
+                toast("Swap Success!");
+                addPts(100); updateBal();
+                document.getElementById('inpBNB').value = ""; document.getElementById('outVIXE').value = "";
+            } catch(e) { 
+                let msg = "Swap Failed";
+                if(e.message.includes("insufficient")) msg = "Insufficient BNB Balance";
+                toast(msg, true); 
             } finally {
-                btn.disabled = false; btn.innerText = "SWAP NOW";
+                btn.innerText = "SWAP NOW"; btn.disabled = false;
             }
         }
 
-        // --- NEW: PAY WITH VIXE (NFT & MEME) ---
-        async function payWithVIXE(type, amountVixe, btnId) {
-            if(!isConnected) return connectWallet()
-                                         connectWallet();
-            
+        // --- PAY WITH VIXE (NFT/MEME) ---
+        async function payVixe(amount, successMsg) {
+            if(!user) return connect();
+            const btnId = amount === 5000 ? 'btnNft' : 'btnMeme';
             const btn = document.getElementById(btnId);
-            const originalText = btn.innerText;
-            btn.disabled = true; 
-            btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Processing ${amountVixe} VIXE Transfer...`;
+            const oldText = btn.innerText;
+            btn.innerText = "Sending VIXE..."; btn.disabled = true;
 
             try {
-                // 1. Cek Saldo VIXE User
-                const tokenContract = new ethers.Contract(CFG.TOKEN, ERC20_ABI, signer);
-                const balance = await tokenContract.balanceOf(user);
-                const costInWei = ethers.utils.parseEther(amountVixe.toString());
-
-                if(balance.lt(costInWei)) {
-                    throw new Error(`Saldo VIXE tidak cukup! Butuh ${amountVixe.toLocaleString()} VIXE.`);
+                const tc = new ethers.Contract(TOKEN, ["function balanceOf(address) view returns (uint)", "function transfer(address, uint) returns (bool)"], signer);
+                const bal = await tc.balanceOf(user);
+                const cost = ethers.utils.parseEther(amount.toString());
+                
+                if(bal.lt(cost)) {
+                     throw new Error(`Insufficient VIXE Balance. Need ${amount.toLocaleString()} VIXE.`);
                 }
 
-                // 2. Eksekusi Transfer VIXE ke Admin/Burn Address
-                toast("Confirming", `Please confirm transfer of ${amountVixe} VIXE in your wallet.`);
-                const tx = await tokenContract.transfer(CFG.ADMIN_WALLET, costInWei);
+                // BUG FIX: Menambahkan gas limit yang cukup (500k) untuk transfer token agar tidak gagal di testnet/mainnet.
+                const tx = await tc.transfer(ADMIN_WALLET, cost, { gasLimit: 500000 }); 
                 
-                toast("Transaction Sent", "Waiting for network confirmation...");
+                toast("Transaction Sent! Waiting for confirmation...");
                 await tx.wait();
-
-                // 3. Sukses!
-                let successMsg = "";
-                let reward = 0;
-                if(type === 'nft') { successMsg = "NFT Minted Successfully! Welcome to the club."; reward = 500; }
-                if(type === 'meme') { successMsg = "Meme Coin Deployed! Check BSCScan."; reward = 1000; }
-                
-                toast("SUCCESS!", successMsg);
-                addPoints(reward);
-
-            } catch(e) {
-                console.error(e);
-                toast("Payment Failed", e.reason || e.message, true);
+                toast(successMsg);
+                addPts(amount === 5000 ? 500 : 1000); 
+                updateBal();
+            } catch(e) { 
+                let msg = e.message || "Transaction Failed";
+                if(msg.includes("Insufficient VIXE")) msg = `ERROR: Insufficient VIXE Balance`;
+                toast(msg, true); 
             } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
-                refreshBal(); // Update saldo setelah bayar
+                btn.innerText = oldText; btn.disabled = false;
             }
         }
 
         // --- TASKS & POINTS ---
-        function doTask(t) {
-            if(tasks[t]) return;
-            if(t==='tw') { window.open("https://twitter.com/intent/tweet?text=Trading%20on%20VIXE%20Protocol%20%F0%9F%9A%80", "_blank"); setTimeout(()=>finishTask('tw','btnTw',50), 5000); }
-            if(t==='add') { if(!isConnected)return connectWallet(); window.ethereum.request({method:'wallet_watchAsset',params:{type:'ERC20',options:{address:CFG.TOKEN,symbol:'VIXE',decimals:18}}}).then(()=>finishTask('add','btnAdd',10)).catch(()=>{}); }
+        function markDone(el) {
+             el.innerText="COMPLETED"; 
+             el.style.cssText = "background: #333; color: #888; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: none;";
+             el.removeAttribute("onclick"); 
         }
-        function finishTask(k, id, p) { if(confirm("Task completed?")) { tasks[k]=true; localStorage.setItem('v11_tasks',JSON.stringify(tasks)); addPoints(p); markDone(id); toast("Points Added", `+${p} VIXE Points`); }}
-        function markDone(id) { const el=document.getElementById(id); el.innerText="COMPLETED"; el.className="glass-input px-5 py-2 rounded-xl text-xs font-bold text-secondary border border-secondary/50 cursor-default"; el.removeAttribute("onclick"); }
-        function addPoints(n) { points+=n; localStorage.setItem('v11_pts',points); document.getElementById('ptsDisplay').innerText=points.toLocaleString(); }
+
+        function task(t) {
+            if(tasks[t]) return toast("Task Already Completed", true);
+
+            if(t==='tw') { 
+                window.open("https://twitter.com/intent/tweet?text=VIXE%20Testnet%20is%20Live!%20%23VIXE", "_blank"); 
+                setTimeout(()=>{ 
+                    if(confirm("Confirm you have shared on Twitter?")) {
+                        tasks.tw = true;
+                        localStorage.setItem('v13_tasks', JSON.stringify(tasks));
+                        addPts(50);
+                        markDone(document.getElementById('btnTw'));
+                        toast("50 Points Added!");
+                    } 
+                }, 3000); 
+            }
+            if(t==='add') { 
+                if(!user) return connect();
+                window.ethereum.request({
+                    method:'wallet_watchAsset',
+                    params:{
+                        type:'ERC20',
+                        options:{address:TOKEN,symbol:'VIXE',decimals:18, image:document.getElementById('vixeLogo').src}
+                    }
+                }).then(() => {
+                    tasks.add = true;
+                                localStorage.setItem('v13_tasks', JSON.stringify(tasks));
+                    addPts(10);
+                    markDone(document.getElementById('btnAdd'));
+                    toast("VIXE Added to Wallet! 10 Points Added.");
+                }).catch(() => {
+                    toast("Failed to Add Token", true);
+                });
+            }
+        }
+
+        function addPts(n) {
+            points += n; localStorage.setItem('pts', points);
+            document.getElementById('pts').innerText = points.toLocaleString();
+        }
 
         // Auto Init
-        if(window.ethereum && window.ethereum.selectedAddress) connectWallet();
+        if(window.ethereum && window.ethereum.selectedAddress) connect();
     </script>
 </body>
-</html>
-    
-                                         
+</html>     
