@@ -3,383 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vinexty Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <title>Vinexty Finance</title>
     
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        /* --- VARIABEL WARNA & TEMA --- */
         :root {
-            --bg-app: #0a0e17; /* Latar belakang sangat gelap */
-            --bg-card: #131a2a; /* Warna kartu sedikit lebih terang */
-            --border-color: #1f2937;
-            --primary: #3b82f6; /* Biru Neon */
-            --primary-dark: #2563eb;
-            --accent: #f59e0b; /* Emas untuk poin */
-            --text-light: #f3f4f6;
-            --text-muted: #9ca3af;
-            --success: #10b981;
+            --bg-dark: #050505;
+            --glass-bg: rgba(20, 20, 20, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --accent: #f59e0b;
+            --text-main: #ffffff;
+            --text-sec: #9ca3af;
+            --nav-bg: rgba(10, 10, 10, 0.9);
         }
 
-        /* --- RESET & BASE STYLES --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            background-color: var(--bg-app);
-            color: var(--text-light);
-            font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 0;
-            padding-bottom: 90px; /* Ruang untuk navigasi bawah */
-            background-image: radial-gradient(circle at top center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-        }
-
-        /* --- KOMPONEN UI --- */
-        /* Header */
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px;
-            background: rgba(10, 14, 23, 0.8); backdrop-filter: blur(10px);
-            position: sticky; top: 0; z-index: 50;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .logo { font-weight: 800; font-size: 22px; background: linear-gradient(45deg, var(--primary), #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        .wallet-badge {
-            background: rgba(59, 130, 246, 0.15); color: var(--primary);
-            padding: 8px 16px; border-radius: 30px; font-weight: 600; font-size: 13px;
-            border: 1px solid rgba(59, 130, 246, 0.3); cursor: pointer; transition: 0.3s;
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0; padding: 0;
+            padding-bottom: 100px;
+            min-height: 100vh;
         }
-        .wallet-badge:active { background: rgba(59, 130, 246, 0.3); }
-        .wallet-badge.connected { background: rgba(16, 185, 129, 0.15); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
 
-        /* Container & Cards */
-        .container { padding: 24px; }
-        .card {
-            background: var(--bg-card);
-            border-radius: 20px;
+        /* HEADER */
+        .header {
+            padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .brand { font-weight: 900; font-size: 22px; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .wallet-chip {
+            background: rgba(59, 130, 246, 0.1); color: var(--primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 8px 16px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .wallet-chip:active { transform: scale(0.95); }
+
+        /* LAYOUT */
+        .container { padding: 20px; max-width: 480px; margin: 0 auto; }
+        .screen { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .screen.active { display: block; }
+
+        /* CARDS (GLASSMORPHISM) */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
 
-        /* Points Section */
-        .points-card { text-align: center; padding: 30px 20px; background: linear-gradient(145deg, #131a2a, #1a2235); }
-        .points-title { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
-        .points-value { 
-            font-size: 48px; font-weight: 800; color: var(--accent); 
-            text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-            margin: 10px 0;
+        /* STATS */
+        .balance-label { font-size: 12px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; }
+        .balance-amount { font-size: 42px; font-weight: 800; margin: 5px 0; background: linear-gradient(45deg, var(--accent), #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* MISSION LIST */
+        .mission-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 0; border-bottom: 1px solid var(--glass-border);
         }
-        .points-subtitle { font-size: 13px; color: var(--text-muted); background: rgba(245, 158, 11, 0.1); display: inline-block; padding: 5px 15px; border-radius: 20px; }
+        .mission-row:last-child { border-bottom: none; }
+        .mission-left { display: flex; align-items: center; gap: 15px; }
+        .mission-icon { 
+            width: 40px; height: 40px; background: rgba(255,255,255,0.05); 
+            border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .mission-info h4 { margin: 0; font-size: 15px; }
+        .mission-info p { margin: 2px 0 0; font-size: 12px; color: var(--text-sec); }
+        
+        .btn-mini {
+            padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
+        .btn-go { background: var(--text-main); color: black; }
 
-        /* Mission Item Style */
-        .mission-item {
-            display: flex; align-items: center;
-            background: rgba(255,255,255,0.03);
-            padding: 16px; border-radius: 16px;
-            margin-bottom: 12px; border: 1px solid var(--border-color);
+        /* SWAP UI */
+        .swap-field {
+            background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px;
+            border: 1px solid transparent; transition: 0.3s;
         }
-        .mission-icon {
-            width: 45px; height: 45px; background: rgba(59, 130, 246, 0.1);
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; color: var(--primary); margin-right: 15px; flex-shrink: 0;
+        .swap-field:focus-within { border-color: var(--primary); background: rgba(0,0,0,0.5); }
+        .field-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 8px; }
+        .field-input-row { display: flex; justify-content: space-between; align-items: center; }
+        .input-amount { 
+            background: transparent; border: none; color: white; font-size: 28px; font-weight: 600; width: 60%; padding: 0;
         }
-        .mission-content { flex-grow: 1; }
-        .mission-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-        .mission-desc { font-size: 12px; color: var(--text-muted); }
-        .mission-btn {
-            padding: 8px 16px; border-radius: 12px; font-size: 13px; font-weight: 600;
-            border: none; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+        .token-pill {
+            display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1);
+            padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 14px;
         }
-        .btn-twitter { background: rgba(29, 161, 242, 0.15); color: #1DA1F2; }
-        .btn-metamask { background: rgba(246, 133, 27, 0.15); color: #F6851B; }
-        .mission-btn:active { transform: scale(0.95); }
-
-        /* Swap UI Professional */
-        .swap-container { background: var(--bg-app); border-radius: 16px; padding: 12px; border: 1px solid var(--border-color); }
-        .swap-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
-        .swap-input-group {
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--bg-card); padding: 16px; border-radius: 12px;
-            border: 1px solid var(--border-color); transition: 0.3s;
+        
+        .swap-arrow {
+            display: flex; justify-content: center; margin: -10px 0; z-index: 2; position: relative;
         }
-        .swap-input-group:focus-within { border-color: var(--primary); }
-        .swap-input {
-            background: transparent; border: none; color: var(--text-light);
-            font-size: 24px; font-weight: 600; width: 60%; outline: none; font-family: 'Poppins';
-        }
-        .token-badge {
-            display: flex; align-items: center; gap: 8px; background: #1f2937;
-            padding: 8px 12px; border-radius: 20px; font-weight: 600; font-size: 14px;
-        }
-        .swap-divider {
-            display: flex; justify-content: center; margin: -12px 0; z-index: 2; position: relative;
-        }
-        .swap-divider-icon {
-            background: var(--bg-card); border: 4px solid var(--bg-app);
-            width: 40px; height: 40px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+        .arrow-circle {
+            background: #1f2937; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 4px solid var(--bg-dark); cursor: pointer;
         }
 
-        /* Main Action Button */
+        /* MAIN BUTTON */
         .btn-main {
-            width: 100%; padding: 18px; border: none; border-radius: 16px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; font-size: 16px; font-weight: 700; letter-spacing: 0.5px;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: 0.3s;
+            width: 100%; padding: 18px; margin-top: 20px;
+            border: none; border-radius: 16px;
+            background: var(--primary); color: white;
+            font-size: 16px; font-weight: 700;
+            box-shadow: 0 0 20px var(--primary-glow);
+            cursor: pointer; transition: 0.2s;
         }
-        .btn-main:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); }
-        .btn-main:disabled { background: var(--border-color); color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { background: #333; color: #666; box-shadow: none; }
 
-        /* Bottom Navigation Pro */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(19, 26, 42, 0.95); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; padding: 15px 0;
-            border-top: 1px solid var(--border-color); z-index: 100;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+        /* BOTTOM NAV */
+        .nav {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            padding: 10px 30px; border-radius: 30px;
+            display: flex; gap: 40px; z-index: 100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         .nav-item {
-            background: none; border: none; color: var(--text-muted);
-            font-size: 11px; font-family: 'Poppins'; font-weight: 600;
-            display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.3s;
+            font-size: 24px; color: var(--text-sec); background: none; border: none; cursor: pointer; transition: 0.3s; position: relative;
         }
-        .nav-item i { font-size: 22px; transition: 0.3s; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item.active i { transform: translateY(-2px); filter: drop-shadow(0 0 8px var(--primary)); }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
+        .nav-item.active::after {
+            content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; background: var(--primary); border-radius: 50%;
+        }
 
-        /* Utility */
-        .screen { display: none; animation: fadeIn 0.4s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #txStatus { text-align: center; margin-top: 15px; font-size: 13px; font-weight: 600; }
-        .text-primary { color: var(--primary); } .text-success { color: var(--success); } .text-danger { color: #ef4444; }
+        /* CUSTOM TOAST NOTIFICATION */
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 999;
+            left: 50%; bottom: 100px; transform: translateX(-50%); font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadein { from {bottom: 80px; opacity: 0;} to {bottom: 100px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 100px; opacity: 1;} to {bottom: 80px; opacity: 0;} }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">VINEXTY</div>
-        <div class="wallet-badge" id="walletBtn" onclick="connectWallet()">
-            <i class="fas fa-wallet" style="margin-right: 8px;"></i>
-            <span id="walletText">Connect Wallet</span>
+        <div class="brand">VINEXTY</div>
+        <div class="wallet-chip" onclick="connectWallet()" id="walletBtn">
+            <i class="fas fa-wallet"></i>
+            <span id="walletText">Connect</span>
         </div>
     </div>
 
     <div id="home" class="screen active">
         <div class="container">
-            <div class="card points-card">
-                <div class="points-title">Total Airdrop Points</div>
-                <div class="points-value"><i class="fas fa-coins" style="margin-right:10px; font-size: 36px;"></i><span id="displayPoints">0</span></div>
-                <div class="points-subtitle">Testnet Campaign Phase 1</div>
+            <div class="glass-card" style="text-align: center;">
+                <div class="balance-label">Airdrop Points</div>
+                <div class="balance-amount" id="displayPoints">0</div>
+                <div style="color: var(--text-sec); font-size: 13px;">🔥 Testnet Phase Live</div>
             </div>
 
-            <h3 style="margin-bottom: 15px; font-weight: 700;">🚀 Misi Wajib</h3>
-            
-            <div class="mission-item">
-                <div class="mission-icon"><i class="fab fa-twitter"></i></div>
-                <div class="mission-content">
-                    <div class="mission-title">Hubungkan Twitter</div>
-                    <div class="mission-desc">Follow & Tweet untuk verifikasi.</div>
+            <div class="glass-card" style="padding: 10px 24px;">
+                <h4 style="margin: 15px 0 5px; color: var(--text-main);">Misi Aktif</h4>
+                
+                <div class="mission-row">
+                    <div class="mission-left">
+                        <div class="mission-icon" style="color: #1DA1F2;"><i class="fab fa-twitter"></i></div>
+                        <div class="mission-info">
+                            <h4>Twitter Task</h4>
+                            <p>Tweet tentang VIXE</p>
+                        </div>
+                    </div>
+                    <button class="btn-mini btn-go" onclick="connectTwitter()">GO</button>
                 </div>
-                <button class="mission-btn btn-twitter" onclick="connectTwitter()">+50 PTS</button>
-            </div>
 
-            <div class="mission-item">
-                <div class="mission-icon"><i class="fas fa-gem"></i></div>
-                <div class="mission-content">
-                    <div class="mission-title">Tambahkan VIXE</div>
-                    <div class="mission-desc">Munculkan token di MetaMask.</div>
+                <div class="mission-row">
+                    <div class="mission-left">
+                        <div class="mission-icon" style="color: #F6851B;"><i class="fas fa-wallet"></i></div>
+                        <div class="mission-info">
+                            <h4>Add Token</h4>
+                            <p>Tampilkan di MetaMask</p>
+                        </div>
+                    </div>
+                    <button class="btn-mini btn-go" onclick="addToken()">ADD</button>
                 </div>
-                <button class="mission-btn btn-metamask" onclick="addToken()">+10 PTS</button>
-            </div>
-             <div style="margin-top: 25px; text-align: center; color: var(--text-muted); font-size: 13px;">
-                <i class="fas fa-info-circle"></i> Selesaikan misi swap di menu "Swap" untuk poin lebih banyak.
             </div>
         </div>
     </div>
 
     <div id="swap" class="screen">
         <div class="container">
-            <div class="card">
-                 <h3 style="margin-bottom: 20px; font-weight: 700; text-align: center;">💱 Instant Swap (Testnet)</h3>
-                
-                <div class="swap-container">
-                    <div class="swap-label">Dari (Pay)</div>
-                    <div class="swap-input-group">
-                        <input type="number" id="bnbInput" class="swap-input" placeholder="0.0" step="0.001">
-                        <div class="token-badge">
-                            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" width="20" alt="BNB"> BNB
-                        </div>
-                    </div>
-
-                    <div class="swap-divider">
-                        <div class="swap-divider-icon"><i class="fas fa-arrow-down"></i></div>
-                    </div>
-
-                    <div class="swap-label">Ke (Receive)</div>
-                    <div class="swap-input-group" style="background: var(--bg-app);">
-                        <input type="text" class="swap-input" placeholder="Estimasi..." disabled style="color: var(--text-muted);">
-                        <div class="token-badge">
-                            <i class="fas fa-coins" style="color: var(--primary);"></i> VIXE
-                        </div>
+            <h2 style="margin-bottom: 20px;">Swap VIXE</h2>
+            
+            <div class="glass-card">
+                <div class="swap-field">
+                    <div class="field-header"><span>Pay</span><span>Balance: <span id="bnbBal">0.0</span></span></div>
+                    <div class="field-input-row">
+                        <input type="number" id="amountIn" class="input-amount" placeholder="0.0">
+                        <div class="token-pill"><i class="fab fa-ethereum"></i> BNB</div>
                     </div>
                 </div>
 
-                <div style="margin: 20px 0;">
-                    <button id="swapBtn" class="btn-main" onclick="executeSwap()" disabled>
-                        KONEK DOMPET DULU
-                    </button>
+                <div class="swap-arrow">
+                    <div class="arrow-circle"><i class="fas fa-arrow-down" style="color: white;"></i></div>
                 </div>
-                
-                <div id="txStatus"></div>
 
-                 <p style="text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 15px;">
-                    Powered by PancakeSwap Router (BSC Testnet).<br>Setiap swap sukses = +100 Poin.
-                </p>
+                <div class="swap-field">
+                    <div class="field-header"><span>Receive</span><span>(Estimasi)</span></div>
+                    <div class="field-input-row">
+                        <input type="text" class="input-amount" placeholder="0.0" disabled style="color: var(--text-sec);">
+                        <div class="token-pill"><i class="fas fa-bolt" style="color: var(--primary);"></i> VIXE</div>
+                    </div>
+                </div>
+
+                <button id="swapBtn" class="btn-main" onclick="executeSwap()">CONNECT WALLET</button>
+                <p style="text-align: center; font-size: 12px; color: var(--text-sec); margin-top: 15px;" id="statusText">Powered by PancakeSwap Router</p>
             </div>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('home', this)">
-            <i class="fas fa-rocket"></i>
-            <span>Airdrop</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('swap', this)">
-            <i class="fas fa-exchange-alt"></i>
-            <span>Swap</span>
-        </button>
+    <div class="nav">
+        <button class="nav-item active" onclick="switchTab('home', this)"><i class="fas fa-home"></i></button>
+        <button class="nav-item" onclick="switchTab('swap', this)"><i class="fas fa-exchange-alt"></i></button>
     </div>
 
+    <div id="toast">Notification</div>
+
     <script>
-        // --- KONFIGURASI KONTRAK (JANGAN UBAH INI) ---
-        const TOKEN_ADDR = "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A";
-        const ROUTER_ADDR = "0xD99D1c33F9fC3444f8101754aBC46c52416550D1";
-        const WBNB_ADDR = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
-        
-        // STATE APLIKASI
-        let points = localStorage.getItem('vixe_points_pro') ? parseInt(localStorage.getItem('vixe_points_pro')) : 0;
+        // CONFIG
+        const TOKEN_ADDR = "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A"; 
+        const ROUTER_ADDR = "0xD99D1c33F9fC3444f8101754aBC46c52416550D1"; 
+        const WBNB_ADDR = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"; 
+
+        let points = localStorage.getItem('vixe_pts') ? parseInt(localStorage.getItem('vixe_pts')) : 0;
         let isConnected = false;
         let provider, signer;
 
-        // INISIALISASI
-        document.getElementById('displayPoints').innerText = points.toLocaleString();
+        // INIT
+        document.getElementById('displayPoints').innerText = points;
 
-        // --- FUNGSI UI ---
-        function switchTab(screenId, btn) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // UI FUNCTIONS
+        function showToast(msg) {
+            const x = document.getElementById("toast");
+            x.innerText = msg;
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
         }
 
-        function updateWalletUI(address) {
-            const walletBtn = document.getElementById('walletBtn');
-            const walletText = document.getElementById('walletText');
-            const swapBtn = document.getElementById('swapBtn');
+        function switchTab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
 
-            walletBtn.classList.add('connected');
-            walletText.innerText = address.substring(0,6) + "..." + address.substring(38);
-            swapBtn.innerText = "TUKAR SEKARANG (SWAP)";
-            swapBtn.disabled = false;
+        function updateWalletBtn(address) {
+            document.getElementById('walletText').innerText = address.substring(0,4) + "..." + address.substring(38);
+            document.getElementById('walletBtn').style.borderColor = "var(--success)";
+            document.getElementById('swapBtn').innerText = "SWAP NOW";
             isConnected = true;
         }
 
-        // --- FUNGSI WEB3 & MISI ---
+        // WEB3 FUNCTIONS
         async function connectWallet() {
             if (window.ethereum) {
                 try {
                     provider = new ethers.providers.Web3Provider(window.ethereum);
                     await provider.send("eth_requestAccounts", []);
                     signer = provider.getSigner();
-                    const address = await signer.getAddress();
-                    updateWalletUI(address);
-                } catch (e) { alert("Koneksi dibatalkan."); }
-            } else { alert("Tolong buka website ini di dalam Browser MetaMask / TrustWallet."); }
+                    const addr = await signer.getAddress();
+                    const bal = await provider.getBalance(addr);
+                    
+                    updateWalletBtn(addr);
+                    document.getElementById('bnbBal').innerText = parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+                    showToast("✅ Dompet Terhubung");
+                } catch (e) { showToast("❌ Koneksi Gagal"); }
+            } else { showToast("⚠️ Buka di MetaMask!"); }
         }
 
         async function addToken() {
-            if (!isConnected) return alert("Konek dompet dulu bos di pojok kanan atas!");
+            if(!isConnected) return connectWallet();
             try {
                 await window.ethereum.request({
                     method: 'wallet_watchAsset',
                     params: { type: 'ERC20', options: { address: TOKEN_ADDR, symbol: 'VIXE', decimals: 18 } },
                 });
-                addPoints(10, "Token ditambahkan!");
+                addPoints(10);
             } catch (e) { console.log(e); }
         }
 
         function connectTwitter() {
-            window.open("https://twitter.com/intent/tweet?text=Saya%20siap%20bergabung%20dengan%20revolusi%20%23Vinexty%20%23VIXE%20Airdrop!%20%F0%9F%9A%80", "_blank");
+            window.open("https://twitter.com/intent/tweet?text=VIXE%20to%20the%20moon!", "_blank");
             setTimeout(() => { 
-                if(confirm("Apakah Anda sudah melakukan Tweet & Follow? (Kami akan memverifikasi nanti)")) {
-                    addPoints(50, "Misi Twitter selesai!"); 
-                }
-            }, 3000);
+                if(confirm("Sudah Tweet?")) addPoints(50); 
+            }, 4000);
         }
 
-        function addPoints(amount, msg) {
-            points += amount;
-            localStorage.setItem('vixe_points_pro', points);
-            document.getElementById('displayPoints').innerText = points.toLocaleString();
-            if(msg) alert("🎉 " + msg + "\n+ " + amount + " Poin!");
+        function addPoints(amt) {
+            points += amt;
+            localStorage.setItem('vixe_pts', points);
+            document.getElementById('displayPoints').innerText = points;
+            showToast("🎉 +" + amt + " Points!");
         }
 
-        // --- LOGIKA SWAP ---
         async function executeSwap() {
-            if (!isConnected) return;
-            const amountIn = document.getElementById('bnbInput').value;
-            const statusEl = document.getElementById('txStatus');
-            const swapBtn = document.getElementById('swapBtn');
+            if(!isConnected) return connectWallet();
+            
+            const val = document.getElementById('amountIn').value;
+            if(!val) return showToast("⚠️ Masukkan jumlah BNB");
 
-            if (!amountIn || amountIn <= 0) return alert("Masukkan jumlah BNB yang valid.");
-            
-            statusEl.innerHTML = "<span class='text-primary'><i class='fas fa-spinner fa-spin'></i> Memproses transaksi di dompet...</span>";
-            swapBtn.disabled = true; swapBtn.innerText = "MEMPROSES...";
-            
+            const btn = document.getElementById('swapBtn');
+            btn.innerText = "Loading...";
+            btn.disabled = true;
+
             try {
                 const router = new ethers.Contract(ROUTER_ADDR, [
                     "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"
                 ], signer);
 
-                // Estimasi gas agar tidak gagal di testnet
-                const gasLimit = await router.estimateGas.swapExactETHForTokens(
-                    0, [WBNB_ADDR, TOKEN_ADDR], await signer.getAddress(), Math.floor(Date.now()/1000)+600,
-                    { value: ethers.utils.parseEther(amountIn) }
-                );
-
                 const tx = await router.swapExactETHForTokens(
-                    0,
-                    [WBNB_ADDR, TOKEN_ADDR],
-                    await signer.getAddress(),
-                    Math.floor(Date.now() / 1000) + 600, // Deadline 10 menit
-                    { value: ethers.utils.parseEther(amountIn), gasLimit: gasLimit.add(50000) } // Tambah buffer gas
+                    0, [WBNB_ADDR, TOKEN_ADDR], await signer.getAddress(), Math.floor(Date.now()/1000)+600,
+                    { value: ethers.utils.parseEther(val) }
                 );
                 
-                statusEl.innerHTML = "<span class='text-primary'>🚀 Transaksi dikirim! Menunggu konfirmasi blockchain...</span>";
+                showToast("🚀 Transaksi Dikirim!");
                 await tx.wait();
+                showToast("✅ Swap Berhasil!");
+                addPoints(100);
                 
-                statusEl.innerHTML = "<span class='text-success'>✅ SWAP BERHASIL! Cek saldo VIXE Anda.</span>";
-                addPoints(100, "Swap Sukses!");
-                document.getElementById('bnbInput').value = "";
-
-            } catch (err) {
-                console.error(err);
-                let errMsg = err.reason || err.message || "Transaksi gagal.";
-                if (errMsg.includes("insufficient funds")) errMsg = "Saldo BNB tidak cukup untuk gas fee.";
-                statusEl.innerHTML = "<span class='text-danger'>❌ Gagal: " + errMsg + "</span>";
+            } catch(e) {
+                showToast("❌ Gagal: " + (e.reason || e.message).substring(0, 20) + "...");
             } finally {
-                swapBtn.disabled = false; swapBtn.innerText = "TUKAR SEKARANG (SWAP)";
+                btn.innerText = "SWAP NOW";
+                btn.disabled = false;
             }
         }
 
-        // Auto-connect jika dibuka di browser wallet tertentu
-        if (window.ethereum && window.ethereum.isMetaMask) {
-            setTimeout(connectWallet, 1000);
+        // Auto Connect Check
+        if(window.ethereum && window.ethereum.selectedAddress) {
+            connectWallet();
         }
     </script>
 </body>
-  </html>
-  
+                                                                                                                    </html>
+        
