@@ -1,213 +1,222 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIXE | Next Gen DeFi</title>
+    <title>VIXE Portal</title>
     
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 
     <style>
         :root {
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --primary: #8b5cf6;
-            --secondary: #ec4899;
+            --bg: #0f1114;
+            --card: #1a1d24;
+            --input: #242832;
+            --primary: #0052ff; /* Coinbase Blue */
             --text: #ffffff;
-            --muted: #a1a1aa;
-            --glow: 0 0 20px rgba(139, 92, 246, 0.5);
+            --subtext: #8a919e;
+            --success: #0ecc83;
+            --error: #ff3b30;
         }
 
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
-            background-color: var(--bg);
-            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
             color: var(--text);
-            margin: 0; padding: 0;
+            font-family: 'Manrope', sans-serif;
+            margin: 0; padding: 20px;
             min-height: 100vh;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            overflow: hidden;
-        }
-
-        /* BACKGROUND ANIMATION */
-        .blob {
-            position: absolute;
-            filter: blur(80px);
-            z-index: -1;
-            opacity: 0.6;
-            animation: float 10s infinite ease-in-out alternate;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: var(--primary); animation-delay: 0s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: var(--secondary); animation-delay: 2s; }
-        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
-
-        /* CONTAINER */
-        .app-container {
-            width: 100%; max-width: 420px; padding: 20px; z-index: 10;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         /* HEADER */
         .header {
+            width: 100%; max-width: 480px;
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 30px;
         }
-        .logo { 
-            font-size: 28px; font-weight: 700; letter-spacing: -1px;
-            background: linear-gradient(to right, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .brand { font-weight: 800; font-size: 24px; letter-spacing: -0.5px; }
+        .brand span { color: var(--primary); }
+        
+        .connect-pill {
+            background: var(--card); border: 1px solid #333;
+            padding: 8px 16px; border-radius: 24px; font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s;
         }
-        .status-pill {
-            font-size: 12px; background: rgba(16, 185, 129, 0.1); color: #34d399;
-            padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);
-            display: flex; align-items: center; gap: 6px;
-        }
-        .status-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
+        .connect-pill:active { transform: scale(0.95); background: #333; }
+        .dot { width: 8px; height: 8px; background: #555; border-radius: 50%; }
+        .dot.active { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
-        /* SWAP CARD */
-        .swap-card {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        /* CARD DESIGN */
+        .card {
+            background: var(--card); width: 100%; max-width: 480px;
+            border-radius: 24px; padding: 20px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
 
-        /* INPUT BOX */
-        .input-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid transparent;
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 8px;
+        /* SWAP UI */
+        .swap-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 16px; font-weight: 700; }
+        
+        .input-container {
+            background: var(--input); border-radius: 16px; padding: 16px;
+            margin-bottom: 4px; border: 1px solid transparent;
             transition: 0.3s;
         }
-        .input-box:focus-within { background: rgba(255,255,255,0.06); border-color: var(--primary); }
+        .input-container:focus-within { border-color: var(--primary); }
 
-        .label-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+        .label-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--subtext); margin-bottom: 8px; }
+        
         .input-row { display: flex; justify-content: space-between; align-items: center; }
-
-        .amount-in {
+        
+        input {
             background: transparent; border: none; color: white;
-            font-size: 32px; font-weight: 700; width: 60%;
-            font-family: 'Space Grotesk', sans-serif;
+            font-size: 28px; font-weight: 600; width: 60%; font-family: 'Manrope';
         }
-        .amount-in::placeholder { color: #333; }
+        input::placeholder { color: #444; }
 
-        .token-badge {
-            background: #1a1a1a; padding: 8px 12px; border-radius: 14px;
-            display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid var(--border);
+        .asset-badge {
+            background: #13151a; padding: 6px 12px; border-radius: 20px;
+            display: flex; align-items: center; gap: 8px; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .asset-icon { width: 24px; height: 24px; border-radius: 50%; }
+
+        /* SWAP ARROW */
+        .swap-divider {
+            height: 6px; position: relative; display: flex; justify-content: center; align-items: center; z-index: 10;
+        }
+        .arrow-box {
+            background: var(--bg); border: 4px solid var(--card);
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; color: var(--subtext);
         }
 
-        /* SWITCHER */
-        .switcher {
-            height: 0; position: relative; display: flex; justify-content: center; align-items: center; z-index: 20;
+        /* MAIN BUTTON */
+        .btn-main {
+            width: 100%; padding: 18px; margin-top: 20px;
+            background: var(--primary); border: none; border-radius: 16px;
+            color: white; font-size: 16px; font-weight: 700;
+            cursor: pointer; transition: 0.2s;
         }
-        .switch-btn {
-            width: 44px; height: 44px; background: #1a1a1a;
-            border: 4px solid var(--bg); border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--muted); cursor: pointer; transition: 0.3s;
-        }
-        .switch-btn:active { transform: scale(0.9) rotate(180deg); }
+        .btn-main:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .btn-main:active { transform: scale(0.98); }
 
-        /* BUTTON */
-        .action-btn {
-            width: 100%; padding: 20px; margin-top: 20px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border: none; border-radius: 20px;
-            color: white; font-size: 18px; font-weight: 700;
-            cursor: pointer; transition: 0.3s;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.4);
+        /* TASK LIST */
+        .task-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid #2a2f3a;
         }
-        .action-btn:active { transform: scale(0.98); filter: brightness(0.9); }
-        .action-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
+        .task-row:last-child { border-bottom: none; }
+        .task-info { display: flex; gap: 12px; align-items: center; }
+        .task-icon { 
+            width: 36px; height: 36px; background: #242832; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; color: var(--primary);
+        }
+        .task-text h4 { margin: 0; font-size: 14px; font-weight: 600; }
+        .task-text p { margin: 2px 0 0; font-size: 11px; color: var(--subtext); }
+        
+        .btn-small {
+            padding: 8px 14px; background: var(--text); color: black;
+            border-radius: 20px; font-size: 12px; font-weight: 700; border: none; cursor: pointer;
+        }
 
-        /* FOOTER INFO */
-        .footer-info {
-            margin-top: 25px; text-align: center; font-size: 12px; color: var(--muted);
+        /* TOAST */
+        #toast {
+            visibility: hidden; min-width: 250px; background: #333; color: #fff; text-align: center;
+            border-radius: 50px; padding: 12px 24px; position: fixed; z-index: 999;
+            left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 13px; font-weight: 600;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
         }
-        .footer-info i { color: var(--primary); }
-
-        /* NOTIFICATION */
-        .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: #1a1a1a; padding: 12px 20px; border-radius: 50px;
-            border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px;
-            transition: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); opacity: 0; z-index: 200;
-        }
-        .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.success i { color: #34d399; }
-        .toast.error i { color: #f87171; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
     </style>
 </head>
 <body>
 
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-
-    <div class="app-container">
-        <div class="header">
-            <div class="logo">VIXE.</div>
-            <div class="status-pill" id="networkStatus">
-                <div class="status-dot"></div> Testnet
-            </div>
-        </div>
-
-        <div class="swap-card">
-            
-            <div class="input-box">
-                <div class="label-row">
-                    <span>Sell</span>
-                    <span>Bal: <span id="bnbBal">0.0</span></span>
-                </div>
-                <div class="input-row">
-                    <input type="number" id="amountIn" class="amount-in" placeholder="0.0">
-                    <div class="token-badge">
-                        <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" width="20"> BNB
-                    </div>
-                </div>
-            </div>
-
-            <div class="switcher">
-                <div class="switch-btn"><i class="fas fa-arrow-down"></i></div>
-            </div>
-
-            <div class="input-box" style="background: rgba(0,0,0,0.2);">
-                <div class="label-row">
-                    <span>Buy</span>
-                    <span>Bal: <span id="vixeBal">0.0</span></span>
-                </div>
-                <div class="input-row">
-                    <input type="text" class="amount-in" placeholder="0.0" disabled style="color: #555;">
-                    <div class="token-badge" style="background: linear-gradient(45deg, #2e1065, #000); border: 1px solid #4c1d95;">
-                        <img src="https://cdn-icons-png.flaticon.com/512/6001/6001368.png" width="20" style="filter: invert(1);"> VIXE
-                    </div>
-                </div>
-            </div>
-
-            <button class="action-btn" id="mainBtn" onclick="handleAction()">
-                CONNECT WALLET
-            </button>
-
-        </div>
-
-        <div class="footer-info">
-            <i class="fas fa-bolt"></i> Powered by <b>Vinexty Protocol</b> on BSC
+    <div class="header">
+        <div class="brand">VIXE<span>.</span></div>
+        <div class="connect-pill" id="connectBtn" onclick="connectWallet()">
+            <div class="dot" id="statusDot"></div>
+            <span id="btnText">Connect Wallet</span>
         </div>
     </div>
 
-    <div class="toast" id="toast">
-        <i class="fas fa-check-circle"></i> <span id="toastMsg">Success</span>
+    <div class="card">
+        <div class="swap-header">
+            <span>Swap</span>
+            <i class="fas fa-cog" style="color: var(--subtext);"></i>
+        </div>
+
+        <div class="input-container">
+            <div class="label-row">
+                <span>Sell</span>
+                <span>Bal: <span id="bnbBal">0.00</span></span>
+            </div>
+            <div class="input-row">
+                <input type="number" id="amountIn" placeholder="0.0">
+                <div class="asset-badge">
+                    <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="asset-icon"> BNB
+                </div>
+            </div>
+        </div>
+
+        <div class="swap-divider">
+            <div class="arrow-box"><i class="fas fa-arrow-down"></i></div>
+        </div>
+
+        <div class="input-container">
+            <div class="label-row">
+                <span>Buy</span>
+                <span>Bal: <span id="vixeBal">0.00</span></span>
+            </div>
+            <div class="input-row">
+                <input type="text" placeholder="0.0" disabled style="color: var(--subtext);">
+                <div class="asset-badge">
+                    <i class="fas fa-bolt asset-icon" style="background:#0052ff; color:white; display:flex; justify-content:center; align-items:center;"></i> VIXE
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-main" id="swapBtn" onclick="handleSwap()">CONNECT WALLET</button>
+        <div style="text-align:center; margin-top:15px; font-size:11px; color:var(--subtext);">
+            Powered by Vinexty Protocol (BSC Testnet)
+        </div>
     </div>
+
+    <div class="card">
+        <div class="swap-header" style="margin-bottom:5px;">Airdrop Tasks</div>
+        <p style="font-size:12px; color:var(--subtext); margin-bottom:20px;">Complete tasks to earn points.</p>
+        
+        <div class="task-row">
+            <div class="task-info">
+                <div class="task-icon"><i class="fab fa-twitter"></i></div>
+                <div class="task-text"><h4>Twitter Share</h4><p>Spread the word</p></div>
+            </div>
+            <button class="btn-small" onclick="taskTwitter()">+50</button>
+        </div>
+
+        <div class="task-row">
+            <div class="task-info">
+                <div class="task-icon"><i class="fas fa-wallet"></i></div>
+                <div class="task-text"><h4>Add Asset</h4><p>Show in MetaMask</p></div>
+            </div>
+            <button class="btn-small" onclick="taskAddToken()">+10</button>
+        </div>
+
+        <div style="margin-top:15px; padding:10px; background:#242832; border-radius:12px; text-align:center;">
+            <span style="font-size:12px; color:#8a919e;">Total Points: </span>
+            <span style="font-size:18px; font-weight:800; color:#f59e0b;" id="pointsDisplay">0</span>
+        </div>
+    </div>
+
+    <div id="toast">Success</div>
 
     <script>
         // --- CONFIGURATION ---
@@ -215,98 +224,97 @@
             TOKEN: "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A",
             ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
             WBNB: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-            CHAIN: "0x61" // 97
+            CHAIN_ID: "0x61" // 97
         };
 
         let provider, signer, address;
         let isConnected = false;
+        let points = localStorage.getItem('vixe_pts') ? parseInt(localStorage.getItem('vixe_pts')) : 0;
 
-        const ui = {
-            btn: document.getElementById('mainBtn'),
-            bnb: document.getElementById('bnbBal'),
-            vixe: document.getElementById('vixeBal'),
-            input: document.getElementById('amountIn')
-        };
+        // INIT
+        document.getElementById('pointsDisplay').innerText = points;
 
-        // --- UTILS ---
-        function notify(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            const i = t.querySelector('i');
-            document.getElementById('toastMsg').innerText = msg;
-            t.className = `toast active ${type}`;
-            i.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-            setTimeout(() => t.className = 'toast', 3000);
+        // TOAST SYSTEM
+        function showToast(msg, type) {
+            const t = document.getElementById("toast");
+            t.innerText = msg;
+            t.style.border = type === 'error' ? '1px solid #ff3b30' : '1px solid #0ecc83';
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
         }
 
-        async function handleAction() {
-            if (!isConnected) await connect();
-            else await swap();
-        }
+        // CONNECT LOGIC
+        async function connectWallet() {
+            // Check if opened in DApp Browser
+            if (typeof window.ethereum === 'undefined') {
+                if(/Android|iPhone/i.test(navigator.userAgent)) {
+                    window.location.href = "dapp://" + window.location.host + window.location.pathname;
+                } else {
+                    alert("Please open in MetaMask / OKX Wallet Browser");
+                }
+                return;
+            }
 
-        // --- CONNECT ---
-        async function connect() {
-            if (!window.ethereum) return alert("Please open in MetaMask App!");
-            
-            ui.btn.innerText = "Connecting...";
+            document.getElementById('btnText').innerText = "Connecting...";
+
             try {
-                // Request Account
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
-                // Auto Network Switch
+                // Auto Switch Network
                 try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: CONFIG.CHAIN }],
-                    });
+                    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CONFIG.CHAIN_ID }] });
                 } catch (e) {
-                    if (e.code === 4902) {
+                    if(e.code === 4902) {
                         await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: CONFIG.CHAIN,
-                                chainName: 'BSC Testnet',
-                                rpcUrls: ['https://data-seed-pre-1-s1.binance.org:8545/'],
-                                nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 }
-                            }],
+                             method: 'wallet_addEthereumChain',
+                             params: [{ chainId: CONFIG.CHAIN_ID, chainName: 'BSC Testnet', rpcUrls: ['https://data-seed-pre-1-s1.binance.org:8545/'], nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 } }]
                         });
                     }
                 }
 
-                // Setup
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 address = accounts[0];
 
                 isConnected = true;
-                ui.btn.innerText = "SWAP VIXE";
-                notify("Wallet Connected");
+                updateUI(true);
                 refreshData();
+                showToast("Wallet Connected", "success");
 
             } catch (e) {
-                ui.btn.innerText = "CONNECT WALLET";
-                notify(e.message, "error");
+                console.error(e);
+                document.getElementById('btnText').innerText = "Connect Wallet";
+                showToast("Connection Failed", "error");
             }
         }
 
-        // --- DATA ---
-        async function refreshData() {
-            if(!isConnected) return;
-            
-            const bnbBal = await provider.getBalance(address);
-            ui.bnb.innerText = parseFloat(ethers.utils.formatEther(bnbBal)).toFixed(4);
-
-            const contract = new ethers.Contract(CONFIG.TOKEN, ["function balanceOf(address) view returns (uint)"], provider);
-            const vixeBal = await contract.balanceOf(address);
-            ui.vixe.innerText = parseFloat(ethers.utils.formatEther(vixeBal)).toFixed(2);
+        function updateUI(connected) {
+            if(connected) {
+                document.getElementById('statusDot').classList.add('active');
+                document.getElementById('btnText').innerText = address.substring(0,4) + "..." + address.substring(38);
+                document.getElementById('swapBtn').innerText = "SWAP NOW";
+            }
         }
 
-        // --- SWAP ---
-        async function swap() {
-            const amount = ui.input.value;
-            if (!amount) return notify("Enter BNB amount", "error");
+        async function refreshData() {
+            const bal = await provider.getBalance(address);
+            document.getElementById('bnbBal').innerText = parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+            
+            const contract = new ethers.Contract(CONFIG.TOKEN, ["function balanceOf(address) view returns (uint)"], provider);
+            const vBal = await contract.balanceOf(address);
+            document.getElementById('vixeBal').innerText = parseFloat(ethers.utils.formatEther(vBal)).toFixed(2);
+        }
 
-            ui.btn.innerText = "Processing...";
-            ui.btn.disabled = true;
+        // SWAP LOGIC
+        async function handleSwap() {
+            if(!isConnected) return connectWallet();
+            
+            const amt = document.getElementById('amountIn').value;
+            if(!amt || amt <= 0) return showToast("Enter valid amount", "error");
+
+            const btn = document.getElementById('swapBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
 
             try {
                 const router = new ethers.Contract(CONFIG.ROUTER, [
@@ -314,31 +322,55 @@
                 ], signer);
 
                 const tx = await router.swapExactETHForTokens(
-                    0,
-                    [CONFIG.WBNB, CONFIG.TOKEN],
-                    address,
-                    Math.floor(Date.now() / 1000) + 600,
-                    { value: ethers.utils.parseEther(amount) }
+                    0, [CONFIG.WBNB, CONFIG.TOKEN], address, Math.floor(Date.now()/1000)+600,
+                    { value: ethers.utils.parseEther(amt) }
                 );
-
-                notify("Transaction Sent! 🚀");
-                await tx.wait();
-                notify("Swap Successful! 🎉");
                 
-                ui.input.value = "";
+                showToast("Transaction Sent!", "success");
+                await tx.wait();
+                
+                showToast("Swap Successful!", "success");
+                addPoints(100);
                 refreshData();
+                document.getElementById('amountIn').value = "";
 
             } catch (e) {
                 console.error(e);
-                let msg = "Transaction Failed";
-                if (e.message.includes("insufficient")) msg = "Not enough BNB";
-                notify(msg, "error");
+                let msg = "Swap Failed";
+                if(e.message.includes("insufficient")) msg = "Insufficient BNB";
+                showToast(msg, "error");
             } finally {
-                ui.btn.innerText = "SWAP VIXE";
-                ui.btn.disabled = false;
+                btn.disabled = false;
+                btn.innerText = "SWAP NOW";
             }
         }
+
+        // TASKS
+        function addPoints(val) {
+            points += val;
+            localStorage.setItem('vixe_pts', points);
+            document.getElementById('pointsDisplay').innerText = points;
+        }
+
+        function taskTwitter() {
+            window.open("https://twitter.com/intent/tweet?text=Joining%20VIXE%20Testnet!%20%23BSC", "_blank");
+            setTimeout(() => { if(confirm("Task completed?")) addPoints(50); }, 2000);
+        }
+
+        async function taskAddToken() {
+            if(!isConnected) return connectWallet();
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: { type: 'ERC20', options: { address: CONFIG.TOKEN, symbol: 'VIXE', decimals: 18 } },
+                });
+                addPoints(10);
+            } catch(e) {}
+        }
+
+        // Auto Init
+        if(window.ethereum && window.ethereum.selectedAddress) connectWallet();
+
     </script>
 </body>
-    </html>
-                
+</html>
