@@ -1,134 +1,344 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIXE Debug Mode</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VIXE | Next Gen DeFi</title>
     
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
     <style>
-        body { background: #111; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        button { width: 100%; padding: 20px; margin-top: 20px; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
-        .btn-connect { background: #facc15; color: black; }
-        .btn-add { background: #3b82f6; color: white; }
-        .status { margin-top: 20px; color: #fbbf24; border: 1px solid #333; padding: 10px; }
+        :root {
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #8b5cf6;
+            --secondary: #ec4899;
+            --text: #ffffff;
+            --muted: #a1a1aa;
+            --glow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text);
+            margin: 0; padding: 0;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        /* BACKGROUND ANIMATION */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: var(--primary); animation-delay: 0s; }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: var(--secondary); animation-delay: 2s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+
+        /* CONTAINER */
+        .app-container {
+            width: 100%; max-width: 420px; padding: 20px; z-index: 10;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px;
+        }
+        .logo { 
+            font-size: 28px; font-weight: 700; letter-spacing: -1px;
+            background: linear-gradient(to right, #fff, #ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .status-pill {
+            font-size: 12px; background: rgba(16, 185, 129, 0.1); color: #34d399;
+            padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .status-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; box-shadow: 0 0 8px #34d399; }
+
+        /* SWAP CARD */
+        .swap-card {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        /* INPUT BOX */
+        .input-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 8px;
+            transition: 0.3s;
+        }
+        .input-box:focus-within { background: rgba(255,255,255,0.06); border-color: var(--primary); }
+
+        .label-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+        .input-row { display: flex; justify-content: space-between; align-items: center; }
+
+        .amount-in {
+            background: transparent; border: none; color: white;
+            font-size: 32px; font-weight: 700; width: 60%;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .amount-in::placeholder { color: #333; }
+
+        .token-badge {
+            background: #1a1a1a; padding: 8px 12px; border-radius: 14px;
+            display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid var(--border);
+        }
+
+        /* SWITCHER */
+        .switcher {
+            height: 0; position: relative; display: flex; justify-content: center; align-items: center; z-index: 20;
+        }
+        .switch-btn {
+            width: 44px; height: 44px; background: #1a1a1a;
+            border: 4px solid var(--bg); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); cursor: pointer; transition: 0.3s;
+        }
+        .switch-btn:active { transform: scale(0.9) rotate(180deg); }
+
+        /* BUTTON */
+        .action-btn {
+            width: 100%; padding: 20px; margin-top: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none; border-radius: 20px;
+            color: white; font-size: 18px; font-weight: 700;
+            cursor: pointer; transition: 0.3s;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.4);
+        }
+        .action-btn:active { transform: scale(0.98); filter: brightness(0.9); }
+        .action-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
+
+        /* FOOTER INFO */
+        .footer-info {
+            margin-top: 25px; text-align: center; font-size: 12px; color: var(--muted);
+        }
+        .footer-info i { color: var(--primary); }
+
+        /* NOTIFICATION */
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: #1a1a1a; padding: 12px 20px; border-radius: 50px;
+            border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px;
+            transition: 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); opacity: 0; z-index: 200;
+        }
+        .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success i { color: #34d399; }
+        .toast.error i { color: #f87171; }
+
     </style>
 </head>
 <body>
 
-    <h1>🦊 VIXE CONNECTION TEST</h1>
-    <p>Versi Debugging</p>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
 
-    <div class="status" id="debugLog">Menunggu aksi...</div>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">VIXE.</div>
+            <div class="status-pill" id="networkStatus">
+                <div class="status-dot"></div> Testnet
+            </div>
+        </div>
 
-    <button class="btn-connect" onclick="startConnect()">1. CONNECT WALLET</button>
-    <button class="btn-add" onclick="addToken()">2. ADD TOKEN</button>
+        <div class="swap-card">
+            
+            <div class="input-box">
+                <div class="label-row">
+                    <span>Sell</span>
+                    <span>Bal: <span id="bnbBal">0.0</span></span>
+                </div>
+                <div class="input-row">
+                    <input type="number" id="amountIn" class="amount-in" placeholder="0.0">
+                    <div class="token-badge">
+                        <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" width="20"> BNB
+                    </div>
+                </div>
+            </div>
+
+            <div class="switcher">
+                <div class="switch-btn"><i class="fas fa-arrow-down"></i></div>
+            </div>
+
+            <div class="input-box" style="background: rgba(0,0,0,0.2);">
+                <div class="label-row">
+                    <span>Buy</span>
+                    <span>Bal: <span id="vixeBal">0.0</span></span>
+                </div>
+                <div class="input-row">
+                    <input type="text" class="amount-in" placeholder="0.0" disabled style="color: #555;">
+                    <div class="token-badge" style="background: linear-gradient(45deg, #2e1065, #000); border: 1px solid #4c1d95;">
+                        <img src="https://cdn-icons-png.flaticon.com/512/6001/6001368.png" width="20" style="filter: invert(1);"> VIXE
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-btn" id="mainBtn" onclick="handleAction()">
+                CONNECT WALLET
+            </button>
+
+        </div>
+
+        <div class="footer-info">
+            <i class="fas fa-bolt"></i> Powered by <b>Vinexty Protocol</b> on BSC
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i> <span id="toastMsg">Success</span>
+    </div>
 
     <script>
-        const TOKEN_ADDR = "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A";
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            TOKEN: "0x5A0Bb91f96DC5D2d27C2Ec9f3425D9d438653b6A",
+            ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+            WBNB: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+            CHAIN: "0x61" // 97
+        };
 
-        // Fungsi pencatat Log ke layar agar kelihatan di HP
-        function log(msg) {
-            document.getElementById("debugLog").innerText = msg;
-            // alert(msg); // Uncomment kalau mau popup muncul terus
+        let provider, signer, address;
+        let isConnected = false;
+
+        const ui = {
+            btn: document.getElementById('mainBtn'),
+            bnb: document.getElementById('bnbBal'),
+            vixe: document.getElementById('vixeBal'),
+            input: document.getElementById('amountIn')
+        };
+
+        // --- UTILS ---
+        function notify(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const i = t.querySelector('i');
+            document.getElementById('toastMsg').innerText = msg;
+            t.className = `toast active ${type}`;
+            i.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            setTimeout(() => t.className = 'toast', 3000);
         }
 
-        async function startConnect() {
-            log("Memulai koneksi...");
+        async function handleAction() {
+            if (!isConnected) await connect();
+            else await swap();
+        }
 
-            // 1. Cek apakah Ethers.js jalan
-            if (typeof ethers === 'undefined') {
-                log("❌ CRITICAL: Library Ethers.js gagal dimuat oleh HP Anda. Coba refresh pakai Wifi kencang.");
-                return;
-            }
-
-            // 2. Cek apakah ada Wallet
-            if (typeof window.ethereum === 'undefined') {
-                log("❌ Dompet tidak terdeteksi! Pastikan buka di Browser MetaMask/OKX, bukan Chrome biasa.");
-                return;
-            }
-
+        // --- CONNECT ---
+        async function connect() {
+            if (!window.ethereum) return alert("Please open in MetaMask App!");
+            
+            ui.btn.innerText = "Connecting...";
             try {
-                log("Meminta akses akun...");
-                
-                // 3. Request Akun (Cara Manual Paling Dasar)
+                // Request Account
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 
-                if (accounts.length === 0) {
-                    log("❌ User menolak koneksi.");
-                    return;
-                }
-
-                const userAddress = accounts[0];
-                log("✅ Terhubung: " + userAddress.substring(0,6) + "...");
-
-                // 4. Cek Chain ID (Wajib BSC Testnet: 97 atau 0x61)
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                log("Chain ID terdeteksi: " + chainId);
-
-                if (chainId !== '0x61' && chainId !== 97) {
-                    log("⚠️ Salah Jaringan! Mencoba pindah ke BSC Testnet...");
-                    await switchNetwork();
-                } else {
-                    log("✅ Jaringan Aman (BSC Testnet). Siap Swap.");
-                }
-
-            } catch (err) {
-                log("❌ Error: " + err.message);
-            }
-        }
-
-        async function switchNetwork() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x61' }],
-                });
-                log("✅ Berhasil pindah jaringan!");
-            } catch (error) {
-                // Jika error code 4902, berarti jaringan belum ada, harus add manual
-                if (error.code === 4902) {
-                    log("Jaringan belum ada, mencoba menambahkan...");
-                    try {
+                // Auto Network Switch
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: CONFIG.CHAIN }],
+                    });
+                } catch (e) {
+                    if (e.code === 4902) {
                         await window.ethereum.request({
                             method: 'wallet_addEthereumChain',
                             params: [{
-                                chainId: '0x61',
-                                chainName: 'BNB Smart Chain Testnet',
+                                chainId: CONFIG.CHAIN,
+                                chainName: 'BSC Testnet',
                                 rpcUrls: ['https://data-seed-pre-1-s1.binance.org:8545/'],
-                                nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 },
-                                blockExplorerUrls: ['https://testnet.bscscan.com']
+                                nativeCurrency: { name: 'BNB', symbol: 'tBNB', decimals: 18 }
                             }],
                         });
-                        log("✅ Jaringan ditambahkan & terhubung!");
-                    } catch (addError) {
-                        log("❌ Gagal nambah jaringan: " + addError.message);
                     }
-                } else {
-                    log("❌ Gagal ganti jaringan: " + error.message);
                 }
+
+                // Setup
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                address = accounts[0];
+
+                isConnected = true;
+                ui.btn.innerText = "SWAP VIXE";
+                notify("Wallet Connected");
+                refreshData();
+
+            } catch (e) {
+                ui.btn.innerText = "CONNECT WALLET";
+                notify(e.message, "error");
             }
         }
 
-        async function addToken() {
-            log("Menambahkan token...");
+        // --- DATA ---
+        async function refreshData() {
+            if(!isConnected) return;
+            
+            const bnbBal = await provider.getBalance(address);
+            ui.bnb.innerText = parseFloat(ethers.utils.formatEther(bnbBal)).toFixed(4);
+
+            const contract = new ethers.Contract(CONFIG.TOKEN, ["function balanceOf(address) view returns (uint)"], provider);
+            const vixeBal = await contract.balanceOf(address);
+            ui.vixe.innerText = parseFloat(ethers.utils.formatEther(vixeBal)).toFixed(2);
+        }
+
+        // --- SWAP ---
+        async function swap() {
+            const amount = ui.input.value;
+            if (!amount) return notify("Enter BNB amount", "error");
+
+            ui.btn.innerText = "Processing...";
+            ui.btn.disabled = true;
+
             try {
-                await window.ethereum.request({
-                    method: 'wallet_watchAsset',
-                    params: {
-                        type: 'ERC20',
-                        options: {
-                            address: TOKEN_ADDR,
-                            symbol: 'VIXE',
-                            decimals: 18,
-                        },
-                    },
-                });
-                log("✅ Token Request Terkirim.");
-            } catch (error) {
-                log("❌ Error Add Token: " + error.message);
+                const router = new ethers.Contract(CONFIG.ROUTER, [
+                    "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable"
+                ], signer);
+
+                const tx = await router.swapExactETHForTokens(
+                    0,
+                    [CONFIG.WBNB, CONFIG.TOKEN],
+                    address,
+                    Math.floor(Date.now() / 1000) + 600,
+                    { value: ethers.utils.parseEther(amount) }
+                );
+
+                notify("Transaction Sent! 🚀");
+                await tx.wait();
+                notify("Swap Successful! 🎉");
+                
+                ui.input.value = "";
+                refreshData();
+
+            } catch (e) {
+                console.error(e);
+                let msg = "Transaction Failed";
+                if (e.message.includes("insufficient")) msg = "Not enough BNB";
+                notify(msg, "error");
+            } finally {
+                ui.btn.innerText = "SWAP VIXE";
+                ui.btn.disabled = false;
             }
         }
     </script>
 </body>
-</html>
+    </html>
+                
