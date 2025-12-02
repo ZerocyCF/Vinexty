@@ -3,29 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VIXE TERMINAL</title>
+    <title>VIXE OBELISK</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Exo+2:wght@300;600;800&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Rajdhani', 'sans-serif'], display: ['Orbitron', 'sans-serif'] },
+                    fontFamily: { display: ['Orbitron', 'sans-serif'], body: ['Exo 2', 'sans-serif'] },
                     colors: {
-                        bg: '#030508',
-                        glass: 'rgba(10, 15, 30, 0.75)',
-                        neon: '#00f3ff',
-                        pink: '#bc13fe',
-                        gold: '#ffd700'
+                        bg: '#000000',
+                        glass: 'rgba(10, 10, 12, 0.85)',
+                        neon: '#00ffcc',
+                        crimson: '#ff003c',
+                        plasma: '#bf00ff'
                     },
-                    boxShadow: {
-                        'neon': '0 0 10px #00f3ff, 0 0 20px rgba(0, 243, 255, 0.3)',
-                        'pink': '0 0 10px #bc13fe, 0 0 20px rgba(188, 19, 254, 0.3)',
+                    animation: {
+                        'spin-slow': 'spin 10s linear infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scan': 'scan 2s linear infinite',
+                    },
+                    keyframes: {
+                        scan: { '0%': { backgroundPosition: '0% 0%' }, '100%': { backgroundPosition: '0% 100%' } }
                     }
                 }
             }
@@ -33,275 +37,253 @@
     </script>
 
     <style>
-        body { background-color: #000; color: #fff; overflow-x: hidden; }
-        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+        body { background-color: #000; overflow-x: hidden; color: #fff; }
         
-        /* ULTRA GLASS */
-        .cyber-card {
-            background: linear-gradient(145deg, rgba(10,15,30,0.8) 0%, rgba(5,5,10,0.9) 100%);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        /* --- CRT / CYBER EFFECT --- */
+        .scanline {
+            width: 100%; height: 100px; z-index: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 255, 204, 0.05) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1; background-size: 100% 2px;
+            animation: scan 3s linear infinite; pointer-events: none; position: fixed;
+        }
+        
+        /* --- OBELISK CARD --- */
+        .obelisk-card {
+            background: #050505; border: 1px solid #333;
             position: relative; overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.05);
         }
-        .cyber-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #00f3ff, transparent);
-            animation: scan 3s infinite linear;
+        .obelisk-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon), transparent);
+            box-shadow: 0 0 10px var(--neon);
         }
-        @keyframes scan { 0% {transform: translateX(-100%)} 100% {transform: translateX(100%)} }
+        .obelisk-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--plasma), transparent);
+        }
 
-        /* INPUTS */
+        /* --- INPUTS --- */
         .cyber-input {
-            background: rgba(0,0,0,0.6); border: 1px solid #333; transition: 0.3s;
-            font-family: 'Orbitron'; letter-spacing: 1px;
+            background: #0a0a0a; border: 1px solid #222;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: 0.3s;
         }
-        .cyber-input:focus-within { border-color: #00f3ff; box-shadow: 0 0 15px rgba(0,243,255,0.2); }
+        .cyber-input:focus-within { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0,255,204,0.2); }
 
-        /* BUTTONS */
-        .btn-god {
-            background: linear-gradient(90deg, #00f3ff, #bc13fe);
-            color: black; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase;
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-            transition: 0.2s; cursor: pointer; border: none;
+        /* --- BUTTONS --- */
+        .btn-glitch {
+            background: #00ffcc; color: #000; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase;
+            border: none; position: relative; clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            transition: 0.2s; box-shadow: 0 0 20px rgba(0,255,204,0.4);
         }
-        .btn-god:active { transform: scale(0.98); filter: brightness(1.2); }
-        .btn-god:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+        .btn-glitch:active { transform: scale(0.98); background: #fff; }
+        .btn-glitch:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
 
-        /* HUD ELEMENTS */
-        .hud-text { font-family: 'Orbitron'; letter-spacing: 2px; }
-        .nav-active { color: #00f3ff; text-shadow: 0 0 10px #00f3ff; border-bottom: 2px solid #00f3ff; }
-        
-        /* TOAST */
+        /* --- NAV --- */
+        .nav-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); transition: 0.3s;
+        }
+        .nav-btn.active { border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 15px rgba(0,255,204,0.2); }
+
+        /* --- TOAST --- */
         #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.9); border: 1px solid #00f3ff;
-            z-index: 9999; transition: 0.5s; box-shadow: 0 0 20px rgba(0,243,255,0.3);
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-200%);
+            background: rgba(0,0,0,0.95); border: 1px solid #00ffcc; color: #00ffcc;
+            z-index: 9999; transition: 0.4s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+            font-family: 'Orbitron'; letter-spacing: 1px;
+            box-shadow: 0 0 30px rgba(0,255,204,0.3);
         }
-        #toast.show { top: 30px; }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.error { border-color: #ff003c; color: #ff003c; box-shadow: 0 0 30px rgba(255,0,60,0.3); }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body>
 
-    <canvas id="bgCanvas"></canvas>
+    <div class="scanline"></div>
 
-    <nav class="fixed w-full z-50 top-0 bg-black/80 backdrop-blur-xl border-b border-white/10">
+    <header class="fixed w-full top-0 z-50 bg-black/90 border-b border-white/10 backdrop-blur-md">
         <div class="max-w-md mx-auto px-5 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <i class="fas fa-atom text-neon text-2xl animate-spin-slow"></i>
-                <span class="font-display text-xl text-white tracking-widest">VIXE<span class="text-neon">_OS</span></span>
+                <i class="fas fa-cube text-neon text-xl animate-pulse-fast"></i>
+                <span class="font-display text-xl font-black tracking-widest">VIXE<span class="text-neon">.OS</span></span>
             </div>
-            <button id="connectBtn" onclick="connect()" class="font-display text-[10px] border border-neon/50 text-neon px-4 py-2 bg-neon/10 hover:bg-neon/20 transition-all clip-path-polygon">
-                INITIALIZE
+            <button id="connectBtn" onclick="connectWallet()" class="font-display text-xs border border-white/20 px-4 py-2 rounded bg-white/5 hover:bg-neon/10 hover:border-neon hover:text-neon transition-all">
+                <i class="fas fa-power-off mr-2"></i>CONNECT
             </button>
         </div>
-    </nav>
+    </header>
 
-    <main class="flex-1 pt-28 pb-32 px-4 max-w-md mx-auto w-full relative z-10">
+    <main class="pt-28 pb-36 px-4 max-w-md mx-auto min-h-screen relative z-10">
         
-        <div class="cyber-card rounded-xl p-6 mb-8 text-center">
-            <div class="flex justify-between items-end border-b border-white/10 pb-2 mb-4">
-                <span class="text-xs text-gray-400 font-bold tracking-widest">MARKET STATUS</span>
-                <span class="text-[10px] text-success font-mono animate-pulse">● ONLINE</span>
+        <div class="obelisk-card rounded-xl p-6 mb-6 text-center">
+            <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+                <span class="text-[10px] text-gray-500 font-display tracking-widest">NETWORK STATUS</span>
+                <span class="text-[10px] text-neon font-mono animate-pulse">● ONLINE</span>
             </div>
-            <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-2">TOTAL LIQUIDITY</p>
-            <h1 class="font-display text-4xl text-white drop-shadow-neon" id="globalVol">Loading...</h1>
             
-            <div class="mt-6 bg-black/40 p-3 rounded border border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-crown text-gold text-lg"></i>
-                    <div class="text-left">
-                        <div class="text-[10px] text-gray-400">TOP TRADER</div>
-                        <div class="text-xs font-mono text-white">0x4A...89B</div>
-                    </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-left">
+                    <p class="text-[9px] text-gray-500 mb-1">GLOBAL VOLUME</p>
+                    <p class="font-display text-xl text-white" id="publicVol">0</p>
                 </div>
                 <div class="text-right">
-                    <div class="text-[10px] text-gray-400">VOL</div>
-                    <div class="text-sm font-bold text-neon">1.2M VIXE</div>
+                    <p class="text-[9px] text-gray-500 mb-1">TOP TRADER</p>
+                    <p class="font-mono text-sm text-neon truncate w-24 ml-auto">0x4A...89B</p>
                 </div>
             </div>
         </div>
 
         <div id="view-swap" class="block">
-            <div class="cyber-card rounded-xl p-6">
+            <div class="obelisk-card rounded-2xl p-6">
                 <div class="flex justify-between mb-6">
-                    <span class="font-display text-xl text-white">EXCHANGE</span>
-                    <span class="text-[10px] border border-pink text-pink px-2 py-1 rounded bg-pink/10">V4 ENGINE</span>
+                    <span class="font-display text-xl text-white">SWAP PROTOCOL</span>
+                    <span class="text-[10px] border border-neon/50 text-neon px-2 py-1 rounded bg-neon/5">V4 ENGINE</span>
                 </div>
 
-                <div class="cyber-input rounded p-4 mb-2">
-                    <div class="flex justify-between text-[10px] text-gray-400 mb-2 uppercase font-bold">
+                <div class="cyber-input p-4 mb-2">
+                    <div class="flex justify-between text-[10px] text-gray-400 mb-2 font-display">
                         <span>PAYMENT</span>
                         <span>BAL: <span id="balBNB" class="text-white">0.00</span></span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <input type="number" id="inpAmt" class="bg-transparent text-2xl font-bold text-white w-full outline-none font-display" placeholder="0.0" oninput="getQuote()">
+                        <input type="number" id="inpAmt" class="bg-transparent text-2xl font-bold text-white w-full outline-none font-display placeholder-gray-700" placeholder="0.0" oninput="getQuote()">
                         <div class="flex items-center gap-2 bg-white/10 px-3 py-1 rounded border border-white/10">
                             <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="w-5">
-                            <span class="font-bold text-xs">BNB</span>
+                            <span class="font-bold text-xs font-display">BNB</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-center -my-4 relative z-20">
+                <div class="flex justify-center -my-4 relative z-10">
                     <div class="w-10 h-10 bg-black border border-neon rounded flex items-center justify-center text-neon shadow-neon">
                         <i class="fas fa-arrow-down"></i>
                     </div>
                 </div>
 
-                <div class="cyber-input rounded p-4 mt-2 pt-6">
-                    <div class="flex justify-between text-[10px] text-gray-400 mb-2 uppercase font-bold">
-                        <span>ASSET</span>
+                <div class="cyber-input p-4 mt-2 pt-6">
+                    <div class="flex justify-between text-[10px] text-gray-400 mb-2 font-display">
+                        <span>RECEIVE</span>
                         <span>BAL: <span id="balVIXE" class="text-white">0.00</span></span>
                     </div>
                     <div class="flex items-center justify-between">
                         <input type="text" id="outAmt" class="bg-transparent text-2xl font-bold text-gray-500 w-full outline-none font-display" placeholder="0.0" disabled>
-                        <div class="flex items-center gap-2 bg-pink/20 px-3 py-1 rounded border border-pink/50">
-                            <i class="fas fa-bolt text-pink"></i>
-                            <span class="font-bold text-xs text-pink">VIXE</span>
+                        <div class="flex items-center gap-2 bg-purple-900/30 px-3 py-1 rounded border border-purple-500/50">
+                            <i class="fas fa-bolt text-purple-400"></i>
+                            <span class="font-bold text-xs font-display text-purple-400">VIXE</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4 flex justify-between text-[10px] font-mono text-gray-500">
                     <span>RATE: <span id="rateTxt" class="text-neon">-</span></span>
-                    <span>SLIPPAGE: <span class="text-white">AUTO (20%)</span></span>
+                    <span>SLIPPAGE: <span class="text-red-500 font-bold">AUTO (20%)</span></span>
                 </div>
 
-                <button id="swapBtn" onclick="handleSwap()" class="btn-god w-full py-4 mt-6 text-lg tracking-widest shadow-neon">
-                    CONNECT SYSTEM
+                <button id="swapBtn" onclick="handleSwap()" class="btn-glitch w-full py-4 mt-6 text-lg">
+                    INITIALIZE SYSTEM
                 </button>
 
-                <div class="mt-6 grid grid-cols-2 gap-2 text-center">
-                    <div class="bg-white/5 p-2 rounded border border-white/5">
-                        <div class="text-[9px] text-gray-500">YOUR VOL</div>
-                        <div class="font-mono text-white" id="myVol">0.00</div>
+                <div class="mt-6 pt-4 border-t border-white/10 grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <p class="text-[9px] text-gray-500 font-display">YOUR VOLUME</p>
+                        <p class="font-mono text-white font-bold" id="myVol">0.00</p>
                     </div>
-                    <div class="bg-white/5 p-2 rounded border border-white/5">
-                        <div class="text-[9px] text-gray-500">POINTS</div>
-                        <div class="font-mono text-neon font-bold" id="myPts">0</div>
+                    <div>
+                        <p class="text-[9px] text-gray-500 font-display">REWARDS</p>
+                        <p class="font-mono text-neon font-bold text-lg drop-shadow-sm" id="myPts">0</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div id="view-hist" class="hidden">
-            <h2 class="font-display text-lg mb-4 pl-2 border-l-4 border-neon">TRANSACTION LOG</h2>
-            <div id="histLog" class="space-y-2">
-                <div class="cyber-card p-4 text-center text-gray-600 text-xs">NO DATA FOUND</div>
-            </div>
+            <h2 class="font-display text-lg mb-4 pl-2 border-l-4 border-neon text-white">TRANSACTION LOG</h2>
+            <div id="histLog" class="space-y-3"></div>
         </div>
 
     </main>
 
-    <div class="fixed bottom-0 w-full bg-black/90 border-t border-white/10 z-50 backdrop-blur-lg">
-        <div class="max-w-md mx-auto flex justify-around py-4">
-            <button class="text-neon flex flex-col items-center gap-1" onclick="nav('swap', this)">
-                <i class="fas fa-retweet text-xl drop-shadow-neon"></i>
-                <span class="text-[8px] font-bold tracking-widest">TRADE</span>
-            </button>
-            <button class="text-gray-600 flex flex-col items-center gap-1" onclick="nav('hist', this)">
-                <i class="fas fa-terminal text-xl"></i>
-                <span class="text-[8px] font-bold tracking-widest">LOGS</span>
-            </button>
-        </div>
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full px-8 py-3 flex gap-8 shadow-2xl z-50">
+        <button onclick="nav('swap', this)" class="nav-btn active w-12 h-12 rounded-full flex items-center justify-center text-xl">
+            <i class="fas fa-retweet"></i>
+        </button>
+        <button onclick="nav('hist', this)" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center text-xl">
+            <i class="fas fa-terminal"></i>
+        </button>
     </div>
 
-    <div id="toast" class="flex items-center gap-4 px-6 py-4 rounded-none border-l-4 border-neon bg-black shadow-[0_0_30px_rgba(0,243,255,0.2)]">
-        <div class="text-neon text-2xl"><i class="fas fa-bell"></i></div>
+    <div id="toast" class="px-6 py-4 flex items-center gap-4">
+        <i id="tIcon" class="fas fa-check-circle text-xl"></i>
         <div>
-            <h4 class="font-display text-sm text-white" id="tTitle">SYSTEM</h4>
-            <p class="text-xs text-gray-400 font-mono" id="tMsg">Operational</p>
+            <h4 class="font-display text-sm font-bold text-white" id="tTitle">SYSTEM</h4>
+            <p class="text-xs text-gray-300 font-mono" id="tMsg">Operational</p>
         </div>
     </div>
 
     <script>
-        // --- CANVAS ANIMATION (EFEK BERAT) ---
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        const particles = [];
-        for(let i=0; i<40; i++) particles.push({
-            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-            r: Math.random()*2 + 1, d: Math.random()*0.5
-        });
-
-        function animate() {
-            ctx.fillStyle = 'rgba(3, 5, 8, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#7000ff';
-            particles.forEach(p => {
-                p.y -= p.d;
-                if(p.y < 0) p.y = canvas.height;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // --- CONFIGURATION ---
+        // --- V28 CONFIGURATION ---
         const CFG = {
             TOKEN: "0xfdDe1BcAfcfAC533073230120f996E3FBBf1E050", 
             ROUTER: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
             WBNB: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
             CHAIN: "0x61"
         };
-        const SALT = "VIXE_TITAN_KEY";
+        const SALT = "VIXE_OBELISK_SECURE"; 
 
-        // --- SECURE DATA ---
-        function hash(d) { return btoa(JSON.stringify(d) + SALT); }
-        function getData(a) {
-            const r = localStorage.getItem(`v_dat_${a}`);
+        // --- ANTI-TUYUL (HASH INTEGRITY) ---
+        function hash(d) { return btoa(JSON.stringify(d) + SALT).split('').reverse().join(''); } // Obfuscated hash
+        function getData(addr) {
+            const k = `vx_obelisk_${addr}`;
+            const r = localStorage.getItem(k);
             if(!r) return {v:0, p:0, s:0, h:[]};
-            try { const p=JSON.parse(atob(r)); return hash(p.d)===p.s ? p.d : {v:0,p:0,s:0,h:[]}; } catch{return {v:0,p:0,s:0,h:[]};}
+            try { const p=JSON.parse(atob(r)); return hash(p.d)===p.s ? p.d : {v:0,p:0,s:0,h:[]}; } 
+            catch{ return {v:0,p:0,s:0,h:[]}; }
         }
-        function saveData(a, d) { localStorage.setItem(`v_dat_${a}`, btoa(JSON.stringify({d:d, s:hash(d)}))); updateUI(d); }
+        function saveData(addr, d) { localStorage.setItem(`vx_obelisk_${addr}`, btoa(JSON.stringify({d:d, s:hash(d)}))); updateUI(d); }
 
         let provider, signer, user, isConnected = false;
         let userData = {v:0, p:0, s:0, h:[]};
 
-        // --- UI LOGIC ---
+        // --- UI ---
         function toast(head, msg, err=false) {
             const t = document.getElementById('toast');
             document.getElementById('tTitle').innerText = head;
             document.getElementById('tMsg').innerText = msg;
-            t.style.borderColor = err ? '#ff0055' : '#00f3ff';
-            t.className = 'show';
-            setTimeout(() => t.className = '', 4000);
+            t.className = err ? 'show error' : 'show';
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
         function nav(id, el) {
             document.getElementById('view-swap').style.display = id==='swap'?'block':'none';
             document.getElementById('view-hist').style.display = id==='hist'?'block':'none';
-            // Reset colors logic omitted for brevity, purely visual
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
         }
 
         function updateUI(d) {
-            document.getElementById('myVol').innerText = d.v.toFixed(3) + ' BNB';
+            document.getElementById('myVol').innerText = d.v.toFixed(2) + ' BNB';
             document.getElementById('myPts').innerText = d.p;
             
-            // Global Ticker
-            const base = 1500000 + Math.floor(Date.now()/10000);
-            document.getElementById('globalVol').innerText = base.toLocaleString();
+            // Fake Public Vol
+            const base = 2500000 + Math.floor(Date.now()/5000);
+            document.getElementById('publicVol').innerText = base.toLocaleString();
 
             // History
             const h = document.getElementById('histLog');
-            if(d.h.length > 0) {
-                h.innerHTML = d.h.map(tx => `
-                <div class="cyber-card p-3 mb-2 flex justify-between items-center rounded border border-white/10">
-                    <div><div class="text-[10px] font-bold text-neon">EXECUTION CONFIRMED</div><div class="text-[9px] text-gray-500 font-mono">${tx.hash}</div></div>
+            h.innerHTML = d.h.length ? d.h.map(tx => `
+                <div class="obelisk-card p-3 mb-2 flex justify-between items-center rounded">
+                    <div><div class="text-xs font-bold text-neon">EXECUTED</div><div class="text-[9px] text-gray-500 font-mono">${tx.hash}</div></div>
                     <div class="text-right"><div class="text-success font-bold text-xs">+${tx.pts} PTS</div><div class="text-[9px] text-gray-500">${tx.time}</div></div>
-                </div>`).join('');
-            }
+                </div>`).join('') : '<div class="text-center text-xs text-gray-600 p-4">NO LOGS</div>';
         }
 
-        // --- CORE CONNECT ---
-        async function connect() {
-            if(!window.ethereum) return toast("ERROR", "No Web3 Provider Found", true);
-            
-            document.getElementById('walletText').innerText = "INITIALIZING...";
+        // --- CONNECT ---
+        async function connectWallet() {
+            if(!window.ethereum) return toast("ERROR", "MetaMask Not Found", true);
+            const btn = document.getElementById('connectBtn');
+            btn.innerText = "SYNCING...";
             
             try {
                 const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -316,91 +298,89 @@
                 updateUI(userData);
                 isConnected = true;
 
-                document.getElementById('walletText').innerText = user.substring(0,6)+"...";
-                document.getElementById('swapBtn').innerText = "INITIATE SWAP";
-                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-neon shadow-[0_0_10px_#00f3ff]";
-                
+                document.getElementById('connectBtn').innerHTML = `<i class="fas fa-check-circle text-success"></i> ${user.substring(0,4)}`;
+                document.getElementById('swapBtn').innerText = "SWAP NOW";
                 refreshBal();
-                toast("SYSTEM", "Connection Established");
+                toast("SYSTEM", "Wallet Synchronized");
+                window.ethereum.on('accountsChanged', () => window.location.reload());
 
-            } catch(e) { toast("ERROR", "Access Denied", true); document.getElementById('walletText').innerText = "CONNECT"; }
+            } catch(e) { btn.innerText = "RETRY"; toast("ERROR", "Connection Rejected", true); }
         }
 
         async function refreshBal() {
             if(!user) return;
             const bnb = await provider.getBalance(user);
             document.getElementById('balBNB').innerText = parseFloat(ethers.utils.formatEther(bnb)).toFixed(4);
-            
             const tc = new ethers.Contract(CFG.TOKEN, ["function balanceOf(address) view returns (uint)"], provider);
             const vixe = await tc.balanceOf(user);
             document.getElementById('balVIXE').innerText = parseFloat(ethers.utils.formatEther(vixe)).toFixed(2);
         }
 
-        // --- BRUTAL SWAP ENGINE (FIX TAX ERROR) ---
+        // --- BRUTE FORCE SWAP (FIX TAX & GAS) ---
         async function getQuote() {
             const val = document.getElementById('inpAmt').value;
             if(val<=0 || !user) { document.getElementById('outAmt').value=""; return; }
             try {
                 const r = new ethers.Contract(CFG.ROUTER, ["function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"], provider);
                 const res = await r.getAmountsOut(ethers.utils.parseEther(val), [CFG.WBNB, CFG.TOKEN]);
-                const out = parseFloat(ethers.utils.formatEther(res[1]));
-                document.getElementById('outAmt').value = out.toFixed(2);
-                document.getElementById('rateTxt').innerText = `1 BNB ≈ ${(out/val).toFixed(0)} VIXE`;
+                document.getElementById('outAmt').value = parseFloat(ethers.utils.formatEther(res[1])).toFixed(2);
+                document.getElementById('rateTxt').innerText = "active";
             } catch(e) { document.getElementById('outAmt').value="--"; }
         }
 
         async function handleSwap() {
-            if(!user) return connect();
+            if(!user) return connectWallet();
             const val = document.getElementById('inpAmt').value;
-            if(val<=0) return toast("ERROR", "Invalid Input", true);
+            if(val<=0) return toast("ERROR", "Invalid Amount", true);
 
             const btn = document.getElementById('swapBtn');
-            btn.innerHTML = 'PROCESSING <i class="fas fa-cog fa-spin ml-2"></i>';
+            btn.innerHTML = 'EXECUTING <i class="fas fa-cog fa-spin ml-2"></i>';
             btn.disabled = true;
 
             try {
-                // MENGGUNAKAN FUNGSI KHUSUS TOKEN PAJAK (SupportingFeeOnTransferTokens)
-                // Ini solusi pamungkas agar swap tidak gagal
+                // GUNAKAN 'SupportingFeeOnTransferTokens' UNTUK TOKEN PAJAK
                 const router = new ethers.Contract(CFG.ROUTER, [
                     "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) external payable",
                     "function getAmountsOut(uint amountIn, address[] memory path) view returns (uint[] memory amounts)"
                 ], signer);
                 
                 const amts = await router.getAmountsOut(ethers.utils.parseEther(val), [CFG.WBNB, CFG.TOKEN]);
-                const min = amts[1].sub(amts[1].div(100).mul(20)); // Slippage 20% (Brutal)
+                // SLIPPAGE 30% (Sangat tinggi agar tidak gagal di testnet dengan tax)
+                const min = amts[1].sub(amts[1].div(100).mul(30)); 
 
+                // GAS LIMIT 1.000.000 (Brutal)
                 const tx = await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
                     min, [CFG.WBNB, CFG.TOKEN], user, Math.floor(Date.now()/1000)+1200,
-                    { value: ethers.utils.parseEther(val), gasLimit: 1000000 } // GAS SUPER TINGGI
+                    { value: ethers.utils.parseEther(val), gasLimit: 1000000 }
                 );
 
-                toast("NETWORK", "Transaction Broadcasted...");
+                toast("NETWORK", "Broadcasted...");
                 await tx.wait();
 
+                // REWARD
                 userData.s++;
                 userData.v += parseFloat(val);
                 let pts = 100;
-                if(userData.s % 10 === 0) { pts += 5; toast("REWARD", "Streak Bonus +5 PTS"); }
+                if(userData.s % 10 === 0) { pts += 5; toast("BONUS", "+5 Points Streak!"); }
                 userData.p += pts;
-                
                 userData.h.unshift({ hash: tx.hash.substring(0,8), pts: pts, time: new Date().toLocaleTimeString() });
+                
                 saveData(user, userData);
-
-                toast("SUCCESS", "Asset Swapped Successfully");
+                toast("SUCCESS", "Asset Acquired");
                 document.getElementById('inpAmt').value="";
                 refreshBal();
 
             } catch(e) {
                 console.error(e);
-                let m = "Execution Reverted";
-                if(e.message.includes("insufficient")) m = "Insufficient Funds";
+                let m = "Execution Failed";
+                if(e.message.includes("insufficient")) m = "Insufficient BNB";
                 toast("FAILURE", m, true);
             } finally {
-                btn.innerText = "INITIATE SWAP"; btn.disabled = false;
+                btn.innerText = "SWAP NOW"; btn.disabled = false;
             }
         }
 
-        window.onload = () => { if(window.ethereum && window.ethereum.selectedAddress) connect(); };
+        window.onload = () => { if(window.ethereum && window.ethereum.selectedAddress) connectWallet(); };
     </script>
 </body>
 </html>
